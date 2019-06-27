@@ -1,0 +1,227 @@
+spec pkg
+PACKAGE RPT2XLS IS
+	BOLD constant binary_integer := 1;
+	ITALIC constant binary_integer := 2;
+
+        v_curr_page integer := 1;
+
+	UNDERLINE constant binary_integer := 4;
+
+	PROCEDURE put_cell(ColNo binary_integer, CellValue in varchar2,
+										 FontName in varchar2 DEFAULT null,
+										 FontSize in binary_integer DEFAULT null,
+										 FontStyle in binary_integer DEFAULT null,
+										 FontColor in binary_integer DEFAULT null,
+										 BgrColor in binary_integer DEFAULT null
+										 );
+	PROCEDURE new_line;
+	PROCEDURE run;
+	PROCEDURE release_memory;
+
+END;
+----------------------------------------------------------------------------------------------------------------------------------------------
+body bkg 
+PACKAGE BODY RPT2XLS IS
+
+        type t_val is table of varchar2(500) index by binary_integer;
+        type t_num is table of number index by binary_integer;
+
+        Rowno      t_num;
+        vColno     t_num;
+        Val        t_val;
+        vFontName  t_val;
+        vFontSize  t_num;
+        vFontStyle t_num;
+        vFontColor t_num;
+        vBgrColor  t_num;
+
+        page_num number:=0;
+        nextcell number:=0;
+	CurrentRow binary_integer := 1;
+
+	PROCEDURE new_line IS
+	BEGIN
+		CurrentRow := CurrentRow + 1;
+	END;
+	
+
+	PROCEDURE put_cell(ColNo binary_integer, CellValue in varchar2,
+	    		   FontName  in varchar2 DEFAULT null,
+			   FontSize  in binary_integer DEFAULT null,
+			   FontStyle in binary_integer DEFAULT null,
+			   FontColor in binary_integer DEFAULT null,
+			   BgrColor  in binary_integer DEFAULT null) IS
+	BEGIN
+          srw.get_page_num(page_num);
+          nextcell:=nvl(Val.Last,0)+1;
+          Rowno(nextcell):=CurrentRow;
+          vColno(nextcell):=ColNo;
+  
+          :p_paper:=1;
+          If CellValue='Employee Details Report' and page_num >=2 then
+             Val(nextcell-1):=null;
+             Val(nextcell-2):=null;
+          End if;             
+/*
+             vFontName(nextcell-1):=null;
+             vFontSize(nextcell-1):=null;
+             vFontStyle(nextcell-1):=null;
+             vFontColor(nextcell-1):=null;
+             vBgrColor(nextcell-1):=null;
+             */
+          Val(nextcell):=CellValue;
+          vFontName(nextcell):=FontName;
+          vFontSize(nextcell):=FontSize;
+          vFontStyle(nextcell):=FontStyle;
+          vFontColor(nextcell):=FontColor;
+          vBgrColor(nextcell):=BgrColor;
+	END;
+
+	PROCEDURE run IS
+		Application OLE2.OBJ_TYPE; 
+		Workbooks OLE2.OBJ_TYPE;
+		Workbook OLE2.OBJ_TYPE; 
+		Worksheets OLE2.OBJ_TYPE; 
+		Worksheet OLE2.OBJ_TYPE; 
+		WorkCell OLE2.OBJ_TYPE; 
+                WorkFont OLE2.OBJ_TYPE;
+                WorkInterior OLE2.OBJ_TYPE;
+		ArgList OLE2.LIST_TYPE;
+	BEGIN
+
+		Application := OLE2.create_obj('Excel.Application');
+		OLE2.set_property(Application, 'Visible', 1);
+		Workbooks := OLE2.get_obj_property(Application, 'Workbooks');
+                Workbook := OLE2.invoke_obj(WorkBooks, 'Add');
+		Worksheets := OLE2.get_obj_property(Workbook, 'Worksheets');
+		Worksheet := OLE2.get_obj_property(Application, 'ActiveSheet');
+
+		for i in Val.First .. Val.Last
+		loop
+			if Val(i) is not null then
+				ArgList := OLE2.create_arglist;
+				OLE2.add_arg(ArgList, RowNo(i));
+				ole2.add_arg(ArgList, vColNo(i));
+
+				WorkCell := OLE2.get_obj_property(Worksheet, 'Cells', ArgList);
+				ole2.destroy_arglist(ArgList);
+				ole2.set_property(WorkCell, 'Value', Val(i));
+
+				WorkFont := OLE2.get_obj_property(WorkCell, 'Font');
+				if vfontName(i) is not null then
+					OLE2.set_property(WorkFont, 'Name', vfontname(i));
+				end if;
+				if vfontsize(i) is not null then
+					OLE2.set_property(WorkFont, 'Size', vfontsize(i));
+				end if;
+				if mod(vfontstyle(i), 2) = 1  then
+					OLE2.set_property(WorkFont, 'Bold', 1);
+				end if;
+				if mod(vfontstyle(i), 4) > 2  then
+					OLE2.set_property(WorkFont, 'Italic', 1);
+				end if;
+				if mod(vfontstyle(i), 8) > 4  then
+					OLE2.set_property(WorkFont, 'Underline', 2);
+				end if;
+				if vfontcolor(i) is not null then
+					OLE2.set_property(WorkFont, 'ColorIndex', vfontcolor(i));
+				end if;
+				if vBgrcolor(i) is not null then
+					WorkInterior := ole2.Get_Obj_Property(WorkCell, 'Interior');
+					OLE2.set_property(WorkInterior, 'ColorIndex', vBgrcolor(i));
+				end if;
+
+			end if;
+		end loop;
+                
+		ArgList := ole2.create_arglist;
+		ole2.add_arg(ArgList, 'A:Z'); 
+		WorkCell := ole2.Get_Obj_Property(WorkSheet, 'Columns', ArgList); 
+		ole2.destroy_arglist(ArgList);
+		ole2.invoke(WorkCell, 'AutoFit');
+
+
+		OLE2.release_obj(WorkInterior);
+		OLE2.release_obj(WorkFont);
+		OLE2.release_obj(WorkCell);
+		OLE2.release_obj(Worksheet);
+		OLE2.release_obj(Worksheets);
+		OLE2.release_obj(Workbook);
+		OLE2.release_obj(Workbooks);
+		OLE2.release_obj(Application);
+                val.delete;
+	END;
+
+	PROCEDURE release_memory IS
+	BEGIN
+		--Cell := ExcelCells();
+		SYS.DBMS_SESSION.free_unused_user_memory;
+	END;
+
+
+END;
+--------------------------------------------------------------------------------------------------------------------------------
+user parameter 
+p_paper  initial value 0 
+------------------------------------------------------------------------
+button 
+procedure U_1ButtonAction is
+Begin
+  rpt2xls.run;
+null;
+  rpt2xls.new_line;
+  NULL;
+End; 
+-----------------------------------------------------------------------------------------
+—Ì»Ì ‰Ã ›—Ì„  «·ﬂ»Ì— 
+function M_G_i_name_GRPFRFormatTrigger return boolean is
+begin
+  If :p_paper=0 then
+  rpt2xls.new_line;
+
+  rpt2xls.put_cell(1,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,349),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(2,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,141),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(3,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,151),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(4,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,8),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(5,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,2558),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(6,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,2559),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(7,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,1649),FontSize =>14,Bgrcolor=>16);
+  rpt2xls.put_cell(8,IAS_GEN_PKG.GET_PROMPT(:LANG_NO,2491),FontSize =>14,Bgrcolor=>16);
+  
+  rpt2xls.new_line;
+ End If;
+  
+  return (TRUE);
+end; 
+-----------------------------------------------------------------------------------
+—»Ì ‰Ã ›—Ì„ «·’€Ì— 
+function R_G_i_nameFormatTrigger return boolean is
+  v_pn   pls_integer;
+begin
+  
+  srw.get_page_num(v_pn); 
+  if rpt2xls.v_curr_page <> v_pn then 
+     rpt2xls.v_curr_page := v_pn;
+     return true;
+  end if;
+
+  rpt2xls.new_line;
+
+  rpt2xls.put_cell(1,:BILL_NO);
+  rpt2xls.put_cell(2,:CF_BILL_DATE);
+  rpt2xls.put_cell(3,:DOC_TYPE_NAME);
+  rpt2xls.put_cell(4,:BILL_CURRENCY);
+  rpt2xls.put_cell(5,:BILL_AMT);
+  rpt2xls.put_cell(6,:RT_BILL_AMT);
+  rpt2xls.put_cell(7,:NET_AMT);
+  rpt2xls.put_cell(8,:NET_AMT_LOC);
+  
+  
+
+  return (TRUE);
+end;
+--------------------------------------------------
+
+ „ «· Ê«’· „⁄ «·⁄„Ì· Ê ⁄„· ÃœÊ· ias_item_price_copy ‰”Œ… „‰ ÃœÊ· ias_item_price Ê  „ Õ–› «·œ« « «·Ì »Â Õ Ì Ì Õﬂ„ «·⁄„Ì· ›Ì „ €Ì—  ”⁄Ì—… «·«’‰«› 
+ „ ‘—Õ ŒÌ«—«  «·„ €Ì— 
+ „ ‘—Õ Ê  ›⁄Ì· ÷—Ì»… «·ﬁÌ„… «·„÷«›… „‘ —Ì«  Ê „»Ì⁄«  
