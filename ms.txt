@@ -1,0 +1,2643 @@
+create or replace package msa_pkg as 
+------------------------------
+function get_ms1t1_seq  return number ;
+------------------------------
+function get_ms25m2_seq return number ;
+------------------------------
+function get_ms28m1_seq return number ; 
+------------------------------
+function get_ms20s1_seq return number ; 
+------------------------------
+function get_ms21s1_seq return number ; 
+------------------------------ 
+function get_ms2m1_seq  return number ;   
+------------------------------ 
+function get_ms5m1_seq  return number ;
+------------------------------ 
+function get_ms8m1_seq  return number ;
+------------------------------ 
+function get_ms9m1_seq  return number ;
+------------------------------ 
+function get_ms10m1_seq  return number ;
+------------------------------ 
+function get_ms11m1_seq  return number ;
+------------------------------ 
+function get_ms27m1_seq  return number ;
+------------------------------
+function get_ms8t1_seq   return number ;
+------------------------------
+function get_ms8t2_seq   return number ;
+------------------------------
+function get_colum_ms13m (
+                           i_weak_no   varchar2  ,            -- week number from1 to 6
+                           i_day_name  varchar2               -- name of day    from monday to sunday
+                         ) return varchar2 ;
+------------------------------                         
+function check_client_filter (
+                              i_ms27mcp    ms27m.ms27mcp%type    ,    -- company   code (fk cl2mcp)
+                              i_ms27myr    ms27m.ms27myr%type    ,    -- year      code (fk cl2myr)
+                              i_ms27m2     ms27m.ms27m2%type     ,    -- branch  code   (fk cl2m1 )
+                              i_ms27m3     ms27m.ms27m3%type     ,    -- client code    (fk cl2m2 )
+                              i_ms27m4     ms27m.ms27m4%type     ,    -- filter type code (fk ms5s1)
+                              i_ms27m5     ms27m.ms27m5%type          -- filter code (fk ms5s2)
+                             ) return varchar2;
+------------------------------
+function check_item_filter (
+                            i_ps33mcp    ps33m.ps33mcp%type    ,    -- company   code
+                            i_ps33myr    ps33m.ps33myr%type    ,    -- year      code
+                            i_ps33m1     ps33m.ps33m1%type     ,    -- item code
+                            i_ps33m2     ps33m.ps33m2%type     ,    -- filter type
+                            i_ps33m4     ps33m.ps33m4%type          -- filter code
+                           ) return varchar2 ;
+------------------------------
+function check_parent_child_item (
+                                  i_sk1mcp    sk1m.sk1mcp%type    ,    -- company   code
+                                  i_sk1myr    sk1m.sk1myr%type    ,    -- year      code
+                                  i_parent    sk1m.sk1m1%type     ,    -- parent item code
+                                  i_child     sk1m.sk1m1%type          -- child item code
+                                 ) return varchar2 ;                           
+------------------------------
+function check_item (
+                     i_cl1mcp    cl1m.cl1mcp%type   ,         -- company   code
+                     i_cl1myr    cl1m.cl1myr%type   ,         -- year      code
+                     i_cl1m1     cl1m.cl1m1%type    ,         -- branch  code
+                     i_cl1m2     cl1m.cl1m2%type    ,         -- rep.    type (1-2-3)
+                     i_cl1m3     cl1m.cl1m3%type    ,         -- rep     code
+                     i_sk1m1     sk1m.sk1m1%type              -- item code
+                    ) return varchar2 ;
+------------------------------
+procedure fill_rep_items (
+                           i_cl1mcp    cl1m.cl1mcp%type  ,    -- company   code
+                           i_cl1myr    cl1m.cl1myr%type  ,    -- year      code
+                           i_cl1m1     cl1m.cl1m1%type   ,    -- branch  code
+                           i_cl1m2     cl1m.cl1m2%type   ,    -- rep.    type (1-2-3)
+                           i_cl1m3     cl1m.cl1m3%type        -- rep     code
+                          );
+------------------------------
+procedure insert_ms2t_ms3t (
+                           i_ms12m1   ms12m.ms12m1%type  ,    -- run number
+                           i_ms2t230  ms2t.ms2t230%type       -- user code
+                           );
+------------------------------
+procedure  pull_in_ms13m (    
+                        i_ms12m1 ms12m.ms12m1%type       ,    -- run no
+                        i_ms12m2 ms12m.ms12m2%type       ,    -- root code
+                        i_ms12m4 ms12m.ms12m4%type       ,    -- visit code
+                        i_user ms12m.ms12m230%type            -- user
+                         );
+------------------------------
+procedure  pull_in_ms24m (
+                         i_ms12m1 ms12m.ms12m1%type       ,   -- run no
+                         i_ms13m2 ms13m.ms13m2%type       ,   -- serial for tail
+                         i_ms12m4 ms12m.ms12m4%type       ,   -- visit code
+                         i_ms12m230 ms12m.ms12m230%type       -- user
+                         );    
+------------------------------                       
+procedure  pull_in_ms3t (    
+                        i_ms2t1 ms2t.ms2t1%type           ,   -- ser no
+                        i_ms2t3 ms2t.ms2t3%type           ,   -- visit date
+                        i_ms2t7 ms2t.ms2t7%type           ,   -- root code
+                        i_ms2t8 ms2t.ms2t8%type           ,   -- visit code
+                        i_user ms2t.ms2t230%type              -- user
+                        ); 
+------------------------------
+procedure do_success (
+                      i_ms7t1  ms7t.ms7t1%type  ,    -- run no.  (f.k ms6s1)
+                      i_ms7t2  ms7t.ms7t2%type       -- ser
+                      ); 
+------------------------------
+procedure do_fail (
+                    i_ms7t1               ms7t.ms7t1%type ,   -- run no.  (f.k ms6s1)
+                    i_ms7t2               ms7t.ms7t2%type ,   -- ser
+                    i_error_code          ms8t.ms8t4%type ,   -- error code   
+                    i_error_text          ms8t.ms8t5%type     -- error text 
+                   );
+------------------------------  
+procedure insert_ms8t (
+                        i_ms8t2               ms8t.ms8t2%type ,   -- binding (ms8t2_seq)
+                        i_ms8t3               ms8t.ms8t3%type ,   -- error identifier ( f.k ms31s1)
+                        i_ms8t4               ms8t.ms8t4%type ,   -- error code
+                        i_ms8t5               ms8t.ms8t5%type     -- error text 
+                       );
+------------------------------
+procedure get_tablename_pref_suf (
+                                  o_ms30s3   out  ms30s.ms30s3%type ,          -- transfere table   start with
+                                  o_ms30s4   out  ms30s.ms30s4%type            -- transfere table   end with
+                                 ) ;  
+------------------------------ 
+procedure task_create_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+------------------------------  
+function get_ms9t1_seq   return number ;
+------------------------------  
+function get_ms9t2_seq   return number ;
+------------------------------  
+procedure insert_into_ms9t (
+                            i_ms9t1              ms9t.ms9t1%type ,          -- seq (ms9t1_seq)
+                            i_ms9t2              ms9t.ms9t2%type ,          -- binding column (ms9t2_seq)
+                            i_ms9t3              ms9t.ms9t3%type ,          -- identifier (fk ms31s1)
+                            i_ms9t4              ms9t.ms9t4%type ,          -- transaction date
+                            i_ms9t5              ms9t.ms9t5%type ,          -- run no.  (f.k ms6s1)
+                            i_ms9t6              ms9t.ms9t6%type            -- table name
+                           );
+------------------------------ 
+function get_table_name(
+                        i_sid                   ms35m.ms35m1%type  ,  -- SID
+                        i_table                 ms26s.ms26s2%type     -- object  name           (fk wf3m.wf3m1)
+                       )
+return varchar2; 
+------------------------------   
+procedure insert_into_ms12t (
+                              i_ms12t1    ms12t.ms12t1%type    ,          -- fk( ms9t1)
+                              --
+                              i_ms12t3    ms12t.ms12t3%type    ,          -- binding column (ms9t2_seq)
+                              i_ms12t4    ms12t.ms12t4%type    ,          -- identifier (fk ms31s1)
+                              i_ms12t5    ms12t.ms12t5%type    ,          -- statement text 
+                              i_ms12t6    ms12t.ms12t6%type               -- run no.  (f.k ms6s1)
+                            );
+------------------------------ 
+function get_ms12t2_seq   return number ;
+------------------------------    
+procedure task_drop_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+-------------------------------   
+procedure task_delete_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+-------------------------------
+procedure task_alter_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+-------------------------------
+function gen_insert_statement (
+                               i_table       varchar2   ,    -- get data from table name  
+                               i_new_table   varchar2        -- insert data into table 
+                              )  
+return clob    ;
+-------------------------------
+procedure task_insert_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+-------------------------------
+function gen_update_statement (
+                               i_table       varchar2   ,    -- get data from table name  
+                               i_new_table   varchar2        -- insert data into table 
+                              )  
+return clob  ;
+-------------------------------
+procedure task_update_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           );
+-------------------------------
+procedure ins_ms27s (
+                     i_wf4m1       wf4m.wf4m1%type         ,      -- object name
+					 i_ms27s230    ms27s.ms27s230%type            -- created  by
+                    ); 
+-------------------------------
+function get_userid_from_sid (
+                               i_ms35m1       ms35m.ms35m1%type          -- SID
+                              ) return ms35m.ms35m4%type;
+-------------------------------
+function check_item_rep (
+                         i_ms35m1    ms35m.ms35m1%type    ,   -- SID
+					     i_sk1m1     sk1m.sk1m1%type          -- item code
+                         ) return varchar  ;
+-------------------------------
+procedure get_rep_from_userid (
+                               i_ms2m21     ms2m.ms2m21%type   ,     -- user code (grus.usno)
+						       o_ms2mcp out ms2m.ms2mcp%type   ,     -- company   code
+						       o_ms2myr out ms2m.ms2myr%type   ,     -- year      code
+						       o_ms2m2  out ms2m.ms2m2%type    ,     -- branch  code
+						       o_ms2m3  out ms2m.ms2m3%type    ,     -- rep.    type (1-2-3)
+						       o_ms2m4  out ms2m.ms2m4%type          -- rep     code  ( f.k cl1m3)
+                               )   ;
+-------------------------------
+procedure insert_ms38m (  
+                        i_ms38m1    ms38m.ms38m1%type ,    -- SID     (f.k ms37m1)
+                        i_ms38m2    ms38m.ms38m2%type ,    -- database object type (fk ms37m2)  
+                        i_ms38m3    ms38m.ms38m3%type ,    -- object name  (fk ms37m3)
+                        i_ms38m4    ms38m.ms38m4%type ,    -- task code  (fk ms28s1)
+						i_ms38m5    ms38m.ms38m5%type      -- order
+                       );
+-------------------------------
+procedure insert_ms37m ( 
+                        i_ms37m1    ms37m.ms37m1%type ,    -- SID     (f.k ms35m1)
+                        i_ms37m2    ms37m.ms37m2%type ,    -- database object type  (fk ms26s1 )
+                        i_ms37m3    ms37m.ms37m3%type ,    -- object name           (fk ms26s2 )
+                        i_ms37m4    ms37m.ms37m4%type      -- order 
+                       );
+-------------------------------
+procedure ins_ms37m_ms38m (
+                            i_ms35m1 ms35m.ms35m1%type        -- SID
+						   );
+-------------------------------
+end msa_pkg; 
+/ 
+------------------------------
+------------------------------
+------------------------------
+create or replace package body msa_pkg as 
+--------------------------------------------------
+function get_ms1t1_seq  return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms1t1_seq .nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms1t1_seq;
+--------------------------------------------------
+function get_ms25m2_seq return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms25m2_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms25m2_seq ;
+--------------------------------------------------
+function get_ms28m1_seq return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms28m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms28m1_seq ;
+--------------------------------------------------
+function get_ms20s1_seq return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms20s1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms20s1_seq ;
+--------------------------------------------------
+function get_ms21s1_seq return number    
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms21s1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms21s1_seq ;
+--------------------------------------------------
+function get_ms2m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms2m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms2m1_seq ;
+--------------------------------------------------
+function get_ms5m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms5m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms5m1_seq ;
+--------------------------------------------------
+function get_ms8m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms8m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms8m1_seq ;
+--------------------------------------------------
+function get_ms9m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms9m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms9m1_seq ;
+--------------------------------------------------
+function get_ms10m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms10m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms10m1_seq ;
+--------------------------------------------------
+function get_ms11m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms11m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms11m1_seq ;
+--------------------------------------------------
+function get_ms27m1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms27m1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms27m1_seq ;
+--------------------------------------------------
+function get_ms8t1_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms8t1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms8t1_seq ;
+--------------------------------------------------
+function get_ms8t2_seq return number     
+is 
+seq_valu  number ;
+begin 
+    -------------  
+    select ms8t2_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms8t2_seq ;
+--------------------------------------------------
+function get_colum_ms13m (
+                           i_weak_no   varchar2  ,   -- week number from1 to 6
+                           i_day_name  varchar2      -- name of day    from monday to sunday
+                          ) return varchar2
+is
+begin
+    --------------
+    -- this function for getting name of colunm 
+    --------------
+    -- first week
+    --------------
+    if i_weak_no = '1' then
+        --------------
+        if    substr(upper(i_day_name),1,8) = upper('saturday')    then return 'ms13m6' ;
+        elsif substr(upper(i_day_name),1,6) = upper('sunday')      then return 'ms13m7' ;
+        elsif substr(upper(i_day_name),1,6) = upper('monday')      then return 'ms13m8' ;
+        elsif substr(upper(i_day_name),1,7) = upper('tuesday')     then return 'ms13m9' ;
+        elsif substr(upper(i_day_name),1,9) = upper('wednesday')   then return 'ms13m10';
+        elsif substr(upper(i_day_name),1,8) = upper('thursday')    then return 'ms13m11';
+        elsif substr(upper(i_day_name),1,6) = upper('friday')      then return 'ms13m12';
+        end if;
+        --------------
+    -- secend week
+    elsif i_weak_no = '2' then
+        --------------
+        if    substr(upper(i_day_name),1,8) = upper('saturday')    then return 'ms13m13';
+        elsif substr(upper(i_day_name),1,6) = upper('sunday')      then return 'ms13m14';
+        elsif substr(upper(i_day_name),1,6) = upper('monday')      then return 'ms13m15';
+        elsif substr(upper(i_day_name),1,7) = upper('tuesday')     then return 'ms13m16';
+        elsif substr(upper(i_day_name),1,9) = upper('wednesday')   then return 'ms13m17';
+        elsif substr(upper(i_day_name),1,8) = upper('thursday')    then return 'ms13m18';
+        elsif substr(upper(i_day_name),1,6) = upper('friday')      then return 'ms13m19';
+        end if;
+        --------------
+    -- third week
+    elsif i_weak_no = '3' then
+        --------------
+        if    substr(upper(i_day_name),1,8) = upper('saturday')    then return 'ms13m20';
+        elsif substr(upper(i_day_name),1,6) = upper('sunday')      then return 'ms13m21';
+        elsif substr(upper(i_day_name),1,6) = upper('monday')      then return 'ms13m22';
+        elsif substr(upper(i_day_name),1,7) = upper('tuesday')     then return 'ms13m23';
+        elsif substr(upper(i_day_name),1,9) = upper('wednesday')   then return 'ms13m24';
+        elsif substr(upper(i_day_name),1,8) = upper('thursday')    then return 'ms13m25';
+        elsif substr(upper(i_day_name),1,6) = upper('friday')      then return 'ms13m26';
+        end if;
+        --------------
+    -- fourth week
+    elsif i_weak_no = '4' then
+        --------------
+        if    substr(upper(i_day_name),1,8) = upper('saturday')    then return 'ms13m27';
+        elsif substr(upper(i_day_name),1,6) = upper('sunday')      then return 'ms13m28';
+        elsif substr(upper(i_day_name),1,6) = upper('monday')      then return 'ms13m29';
+        elsif substr(upper(i_day_name),1,7) = upper('tuesday')     then return 'ms13m30';
+        elsif substr(upper(i_day_name),1,9) = upper('wednesday')   then return 'ms13m31';
+        elsif substr(upper(i_day_name),1,8) = upper('thursday')    then return 'ms13m32';
+        elsif substr(upper(i_day_name),1,6) = upper('friday')      then return 'ms13m33';
+        end if;
+        --------------
+    -- fifth week
+    elsif i_weak_no = '5' then
+        --------------
+        if    substr(upper(i_day_name),1,8) = upper('saturday')    then return 'ms13m34';
+        elsif substr(upper(i_day_name),1,6) = upper('sunday')      then return 'ms13m35';
+        elsif substr(upper(i_day_name),1,6) = upper('monday')      then return 'ms13m36';
+        elsif substr(upper(i_day_name),1,7) = upper('tuesday')     then return 'ms13m37';
+        elsif substr(upper(i_day_name),1,9) = upper('wednesday')   then return 'ms13m38';
+        elsif substr(upper(i_day_name),1,8) = upper('thursday')    then return 'ms13m39';
+        elsif substr(upper(i_day_name),1,6) = upper('friday')      then return 'ms13m40';
+        end if;
+        --------------
+    end if;
+    --------------
+end get_colum_ms13m;
+--------------------------------------------------
+function check_client_filter (
+                              i_ms27mcp    ms27m.ms27mcp%type    ,    -- company   code (fk cl2mcp)
+                              i_ms27myr    ms27m.ms27myr%type    ,    -- year      code (fk cl2myr)
+                              i_ms27m2     ms27m.ms27m2%type     ,    -- branch  code   (fk cl2m1 )
+                              i_ms27m3     ms27m.ms27m3%type     ,    -- client code    (fk cl2m2 )
+                              i_ms27m4     ms27m.ms27m4%type     ,    -- filter type code (fk ms5s1)
+                              i_ms27m5     ms27m.ms27m5%type          -- filter code (fk ms5s2)
+                             ) return varchar2
+is
+w_count number ;
+begin
+    --------------
+    select count(ms27m1)
+    into   w_count
+    from   ms27m
+    where  ms27mcp = i_ms27mcp and                    -- company   code (fk cl2mcp)
+           ms27myr = i_ms27myr and                    -- year      code (fk cl2myr)
+           ms27m2  = i_ms27m2  and                    -- branch  code   (fk cl2m1 )
+           ms27m3  = i_ms27m3  and                    -- client code    (fk cl2m2 )
+           ms27m4  = i_ms27m4  and                    -- filter type code (fk ms5s1)
+           ms27m5  = i_ms27m5   ;                     -- filter code (fk ms5s2)
+    --------------
+    if nvl(w_count,0) > 0 then
+        return ('Y') ;
+    else
+        return ('N') ;
+    end if;    
+    --------------
+end check_client_filter;
+--------------------------------------------------
+function check_item_filter (
+                            i_ps33mcp    ps33m.ps33mcp%type    ,    -- company   code
+                            i_ps33myr    ps33m.ps33myr%type    ,    -- year      code
+                            i_ps33m1     ps33m.ps33m1%type     ,    -- item code
+                            i_ps33m2     ps33m.ps33m2%type     ,    -- filter type
+                            i_ps33m4     ps33m.ps33m4%type          -- filter code
+                           ) return varchar2
+is
+w_count number ;
+begin
+    --------------
+    select count(ps33m1)
+    into   w_count
+    from   ps33m
+    where  ps33mcp = i_ps33mcp      and                    -- company   code
+           ps33myr = i_ps33myr      and                    -- year      code
+           ps33m1  = i_ps33m1       and                    -- item code
+           ps33m2  = i_ps33m2       and                    -- filter type
+           ps33m4  = i_ps33m4        ;                     -- filter code
+    --------------
+    if nvl(w_count,0) > 0 then
+        return ('Y') ;
+    else
+        return ('N') ;
+    end if;    
+    --------------
+end check_item_filter;
+--------------------------------------------------
+function check_parent_child_item (
+                                  i_sk1mcp    sk1m.sk1mcp%type    ,    -- company   code
+                                  i_sk1myr    sk1m.sk1myr%type    ,    -- year      code
+                                  i_parent    sk1m.sk1m1%type     ,    -- parent item code
+                                  i_child     sk1m.sk1m1%type          -- child item code
+                                 ) return varchar2
+is 
+w_exists varchar2(01) := 'N';
+begin
+    ----------
+    for d in (
+               select level, sk1m1 , sk1m29  
+               from   sk1m
+               where  sk1mcp = i_sk1mcp   and
+                      sk1myr = i_sk1myr 
+               connect by prior sk1m29 = sk1m1
+               start with sk1m1 = nvl(i_child,'z')
+             ) loop
+                ----------
+                if i_parent = d.sk1m1 then -- if parent found
+                    return 'Y'; 
+                else
+                    w_exists := 'N';
+                end if;
+                ----------
+    end loop;
+    ----------
+    return w_exists;    
+    ----------    
+end check_parent_child_item;                                 
+--------------------------------------------------
+function check_item (
+                     i_cl1mcp    cl1m.cl1mcp%type,        -- company   code
+                     i_cl1myr    cl1m.cl1myr%type,        -- year      code
+                     i_cl1m1     cl1m.cl1m1%type,         -- branch  code
+                     i_cl1m2     cl1m.cl1m2%type,         -- rep.    type (1-2-3)
+                     i_cl1m3     cl1m.cl1m3%type,         -- rep     code
+                     i_sk1m1     sk1m.sk1m1%type          -- item code
+                    ) return varchar2
+is
+----
+count_pss33m     number;
+w_return         varchar2(01) := 'N';
+w_is_item_exsist varchar2(01) ;
+----
+    begin
+        ----
+        for j in (
+                    select  ms5m5     ,                   -- item code (f.k sk1m1)
+                            ms5m6     ,                   -- item type (f.k ms6s1)
+                            ms5m7     ,                   -- filter type code (f.k ps31s1) used if ms5m6 = 3
+                            ms5m8     ,                   -- filter code (f.k ps31s2) used if ms5m6 = 3
+                            ms5m9                         -- execlude [y/n]
+                    from    ms5m
+                    where   ms5mcp = i_cl1mcp             -- company   code
+                    and     ms5myr = i_cl1myr             -- year      code
+                    and     ms5m2  = i_cl1m1              -- branch  code
+                    and     ms5m3  = i_cl1m2              -- rep.    type (1-2-3)
+                    and     ms5m4  = i_cl1m3              -- rep     code
+                    order by nvl(ms5m9,'N') desc , ms5m10
+                 ) loop
+                    ----------
+                    if j.ms5m6 = 2 then                   -- item type code(2 normal)
+                        ----------
+                        if j.ms5m5 = i_sk1m1 then
+                            if nvl (j.ms5m9, 'N') = 'Y' then -- excluded 
+                                return 'N';
+                            else
+                                return 'Y';
+                            end if;
+                        else
+                            w_return := 'N';                        
+                        end if;
+                        ----------
+                    elsif j.ms5m6 = 1 then               -- item type code(1 category)
+                        ---------- 
+                        if msa_pkg.check_parent_child_item (
+                                                            i_cl1mcp    ,    -- company   code
+                                                            i_cl1myr    ,    -- year      code
+                                                            j.ms5m5     ,    -- parent item code
+                                                            i_sk1m1          -- child item code
+                                                           ) = 'Y' then
+                            if nvl (j.ms5m9, 'N') = 'Y' then  -- excluded 
+                                return 'N';
+                            else
+                                return 'Y';
+                            end if;    
+                        else
+                            w_return := 'N';
+                        end if;
+                        ---------- 
+                    elsif j.ms5m6 = 3 then                 -- item type code(3 filter)
+                        ----------    
+                         w_is_item_exsist:= msa_pkg.check_item_filter (
+                                                                        i_cl1mcp    ,  -- company   code
+                                                                        i_cl1myr    ,  -- year      code
+                                                                        j.ms5m5     ,  -- item code
+                                                                        j.ms5m7     ,  -- filter type
+                                                                        j.ms5m8        -- filter code
+                                                                      ) ;    
+                        ----------
+                        if nvl(w_is_item_exsist,'N') = 'Y' then
+                            if nvl(j.ms5m9,'N') = 'Y' then   -- excluded 
+                                return 'N';
+                            else
+                                return 'Y';
+                            end if;
+                        else
+                              w_return := 'N';
+                        end if;
+                        ----------
+                    end if;
+                    ----------
+    end loop;
+    ----------
+    return w_return;
+    ---------- 
+end check_item;
+--------------------------------------------------
+procedure fill_rep_items (
+                           i_cl1mcp    cl1m.cl1mcp%type  ,    -- company   code
+                           i_cl1myr    cl1m.cl1myr%type  ,    -- year      code
+                           i_cl1m1     cl1m.cl1m1%type   ,    -- branch  code
+                           i_cl1m2     cl1m.cl1m2%type   ,    -- rep.    type (1-2-3)
+                           i_cl1m3     cl1m.cl1m3%type        -- rep     code
+                         )    
+is pragma autonomous_transaction;
+------------
+cursor sk1m_curs is
+        select sk1m1                            -- item code
+        from   sk1m
+        where  sk1mcp = i_cl1mcp       and      -- company   code
+               sk1myr = i_cl1myr       and      -- year   code
+               sk1m9  = 1              and      -- item nature (1 Normal , 2 category , 3 service)
+               nvl(sk1m31, 'N') = 'Y'  ;        -- item for sale        (Y/N)
+------------
+check_ins         varchar2 (01);
+w_ms28m1_seq      number;
+w_ms25m2_seq      number;
+w_start_date      date;
+w_end_date        date;
+w_item_all        number ;
+w_item_s          number ;
+w_item_f          number ;
+w_count           number;
+------------
+begin
+    ------------
+    w_start_date := sysdate;
+    w_item_all   := 0;
+    w_item_s     := 0;
+    w_item_f     := 0;
+    w_count      := 0;
+    ------------
+    for i in sk1m_curs loop 
+        ------------
+         w_item_all := w_item_all +1;
+        ----------
+        check_ins := msa_pkg.check_item (
+                                         i_cl1mcp ,                 -- company   code
+                                         i_cl1myr ,                 -- year      code
+                                         i_cl1m1  ,                 -- branch  code
+                                         i_cl1m2  ,                 -- rep.    type (1-2-3)
+                                         i_cl1m3  ,                 -- rep     code
+                                         i.sk1m1                    -- item code
+                                        );
+        ------------
+        if nvl(check_ins,'N') = 'Y' then
+            ------------
+            w_count := w_count + 1;
+            w_item_s := w_item_s + 1;  -- success to add to rep items
+            ------------
+            begin
+                ------------
+                if w_count = 1 then 
+                    ------------
+                    begin
+                        ------------
+                        w_ms28m1_seq := get_ms28m1_seq;
+                        ------------
+                        insert into ms28m (
+                                            ms28m1          ,                     -- run no. 
+                                           --                            
+                                            ms28mcp         ,                     -- company   code
+                                            ms28myr         ,                     -- year      code
+                                            ms28m2          ,                     -- branch  code
+                                            ms28m3          ,                     -- rep.    type (1-2-3)
+                                            ms28m4          ,                     -- rep     code  ( f.k cl1m3)
+                                           --                            
+                                            ms28m8          ,                     -- start date (dateime) 
+                                            ms28m231                              -- created on
+                                           )
+                                  values   ( 
+                                            w_ms28m1_seq    ,                     -- run no.
+                                            --
+                                            i_cl1mcp        ,                     -- company   code
+                                            i_cl1myr        ,                     -- year      code
+                                            i_cl1m1         ,                     -- branch  code
+                                            i_cl1m2         ,                     -- rep.    type (1-2-3)
+                                            i_cl1m3         ,                     -- rep     code  ( f.k cl1m3)
+                                            --                            
+                                            w_start_date    ,                     -- start date (dateime)
+                                            sysdate                               -- created on 
+                                           );                                      
+                        ------------
+                        comm;
+                        ------------
+                    exception
+                        when dup_val_on_index then 
+                            raise_application_error(-20010,'duplicate row...msa_pkg.fill_rep_items...ms28m');
+                    end;
+                    ------------
+                end if;
+                ------------                
+                begin
+                    ------------
+                    w_ms25m2_seq := get_ms25m2_seq;
+                    ------------
+                    insert into ms25m (
+                                        ms25m1          ,                     -- run no.
+                                        ms25m2          ,                     -- ser
+                                        --             
+                                        ms25mcp         ,                     -- company   code
+                                        ms25myr         ,                     -- year      code
+                                        ms25m3                                -- item code (f.k sk1m1)
+                                       )
+                              values  ( 
+                                        w_ms28m1_seq    ,                     -- run no.
+                                        w_ms25m2_seq    ,                     -- ser
+                                        i_cl1mcp        ,                     -- company   code
+                                        i_cl1myr        ,                     -- year      code
+                                        i.sk1m1                               -- item code (f.k sk1m1)
+                                       );                                      
+                    ------------
+                exception
+                    when dup_val_on_index then 
+                        raise_application_error(-20011,'duplicate row...msa_pkg.fill_rep_items...ms25m');
+                end;
+                ------------
+            end;
+            ------------
+        else 
+            w_item_f := w_item_f + 1;  --  not success to add to rep items 
+        end if;
+        ------------
+    end loop;
+    ------------
+    w_end_date := sysdate;
+    ------------
+    begin
+        ------------
+        update ms28m 
+        set    ms28m5  =  w_item_all     ,                     -- no of all items
+               ms28m6  =  w_item_s       ,                     -- no of created items 
+               ms28m7  =  w_item_f       ,                     -- no of non created items 
+               ms28m9  =  w_end_date                           -- end   date (dateime) 
+        where  ms28m1  =  w_ms28m1_seq;
+        ------------
+        comm;
+        ------------
+    end;    
+    ------------
+end fill_rep_items;
+--------------------------------------------------
+procedure insert_ms2t_ms3t(
+                                              i_ms12m1   ms12m.ms12m1%type  ,  -- run number
+                                              i_ms2t230  ms2t.ms2t230%type     -- user code
+                                            ) is
+pragma autonomous_transaction;                                            
+--------------------                                            
+w_day_no        number;                        
+w_first_day     date;
+w_weak_no       varchar2(10);              -- number of week from 1 to 6 
+w_day_name      varchar2(100);             -- name of day    from monday to sunday
+w_ser_head      number;                    -- seq in ms2t1
+w_ser1          number;                    -- seq in ms3t2
+w_ser2          number;                    -- seq in ms4t3
+w_stmt          varchar2(2000);            -- for ref cursor
+type ref_cur is ref cursor; 
+w_ref_cur       ref_cur;
+w_ms13m2        ms13m.ms13m2%type;
+w_ms13mcp       ms13m.ms13mcp%type;
+w_ms13myr       ms13m.ms13myr%type;
+w_ms13m3        ms13m.ms13m3%type;
+w_ms13m4        ms13m.ms13m4%type;
+w_ms13m5        ms13m.ms13m5%type;
+w_ser_head1     number;
+--------------------    
+procedure insert_ms2t( 
+                       i_ms2t2       ms2t.ms2t2%type      ,     -- run number
+                       i_ms2t3       ms2t.ms2t3%type      ,     -- calendar date
+                       i_ms2tcp      ms2t.ms2tcp%type     ,     -- company 
+                       i_ms2tyr      ms2t.ms2tyr%type     ,     -- year
+                       i_ms2t4       ms2t.ms2t4%type      ,     -- branch
+                       i_ms2t5       ms2t.ms2t5%type      ,     -- rep type 1-2-3
+                       i_ms2t6       ms2t.ms2t6%type      ,     -- rep code
+                       i_ms2t7       ms2t.ms2t7%type      ,     -- root code
+                       i_ms2t8       ms2t.ms2t8%type      ,     -- visit code
+                       o_ms2t1   out ms2t.ms2t1%type            -- ser code
+                     ) is
+w_count number;
+begin
+    --------------------
+    -- check if ms2t empty or not         
+    -- get ser for head (primary key)
+        --------    
+        select ms2t1_seq.nextval
+        into   o_ms2t1
+        from   dual;    
+            --------        
+            insert into ms2t(
+                              ms2t1      ,     -- serial
+                              ms2t2      ,     -- run number
+                              ms2t3      ,     -- calendar date
+                              ms2tcp     ,     -- company
+                              ms2tyr     ,     -- year
+                              ms2t4      ,     -- branch
+                              ms2t5      ,     -- rep type
+                              ms2t6      ,     -- rep code
+                              ms2t7      ,     -- root code
+                              ms2t8      ,     -- visit code
+                              ms2t9      ,     -- auto
+                              ms2t230    ,     -- user created
+                              ms2t231          -- created date 
+                             ) 
+                    values   (
+                              o_ms2t1    ,     -- serial
+                              i_ms2t2    ,     -- run number
+                              i_ms2t3    ,     -- calendar date
+                              i_ms2tcp   ,     -- company
+                              i_ms2tyr   ,     -- year
+                              i_ms2t4    ,     -- branch
+                              i_ms2t5    ,     -- rep type
+                              i_ms2t6    ,     -- rep code
+                              i_ms2t7    ,     -- root code
+                              i_ms2t8    ,     -- visit code
+                              'N'        ,     -- AUTO
+                              i_ms2t230  ,     -- user created
+                              sysdate          -- created date 
+                             );             
+            --------         
+            comm;
+            --------
+        exception 
+            when dup_val_on_index then null;
+    --------------------      
+end;
+--------------------
+procedure insert_ms3t (
+                       i_ms3t1    ms3t.ms3t1%type    ,     -- ser in head(f.k ms2t1)
+                       i_ms3t2    ms3t.ms3t2%type    ,     -- serial
+                       i_ms3tcp   ms3t.ms3tcp%type   ,     -- company
+                       i_ms3tyr   ms3t.ms3tyr%type   ,     -- year
+                       i_ms3t3    ms3t.ms3t3%type    ,     -- branch
+                       i_ms3t4    ms3t.ms3t4%type    ,     -- client code
+                       i_ms3t5    ms3t.ms3t5%type    ,     -- order
+                       i_ms3t6    ms3t.ms3t6%type    ,     -- root number
+                       i_ms3t7    ms3t.ms3t7%type          -- visit date                   
+                      ) is
+begin
+    -------------
+    insert into ms3t(
+                      ms3t1         ,    -- ser in head(f.k ms2t1)      
+                      ms3t2         ,    -- serial
+                      ms3tcp        ,    -- company
+                      ms3tyr        ,    -- year
+                      ms3t3         ,    -- branch
+                      ms3t4         ,    -- client code
+                      ms3t5         ,    -- order
+                      ms3t6         ,    -- run number
+                      ms3t7         ,    -- visit date
+                      ms3t8         ,    -- auto
+                      ms3t230       ,    -- user created
+                      ms3t231            -- date created
+                    )     
+            values  (
+                      i_ms3t1       ,    -- ser in head(f.k ms2t1)     
+                      i_ms3t2       ,    -- serial
+                      i_ms3tcp      ,    -- company
+                      i_ms3tyr      ,    -- year
+                      i_ms3t3       ,    -- branch
+                      i_ms3t4       ,    -- client code
+                      i_ms3t5       ,    -- order
+                      i_ms3t6       ,    -- run number
+                      i_ms3t7       ,    -- visit date
+                      'N'           ,    -- auto
+                      i_ms2t230     ,    -- user created
+                      sysdate            -- date created
+                    );
+    -------------                
+    comm;
+    -------------                  
+exception 
+    when dup_val_on_index then null;
+    -------------    
+end;
+--------------------
+procedure insert_ms4t(     
+                       i_ms4t1    ms4t.ms4t1%type    ,  -- ser in head(f.k ms2t1)
+                       i_ms4t2    ms4t.ms4t2%type    ,  -- serial in tail1(ms3t2)
+                       i_ms4t3    ms4t.ms4t3%type    ,  -- serial 
+                       i_ms4t4    ms4t.ms4t4%type    ,  -- visit activity code
+                       i_ms4t5    ms4t.ms4t5%type    ,  -- order
+                       i_ms4t6    ms4t.ms4t6%type    ,  -- visible [y/n]
+                       i_ms4t7    ms4t.ms4t7%type    ,  -- mandatory [y/n]
+                       i_ms4t8    ms4t.ms4t8%type    ,  -- active [y/n]
+                       i_ms4t10   ms4t.ms4t10%type   ,  -- run number
+                       i_ms4t11   ms4t.ms4t11%type      -- visit date
+                     ) is
+begin
+    -------------
+    insert into ms4t (
+                       ms4t1      ,    -- ser in head(f.k ms2t1)
+                       ms4t2      ,    -- serial in tail1(ms3t2)
+                       ms4t3      ,    -- serial 
+                       ms4t4      ,    -- visit activity code
+                       ms4t5      ,    -- order
+                       ms4t6      ,    -- visible [y/n]
+                       ms4t7      ,    -- mandatory [y/n]
+                       ms4t8      ,    -- active [y/n]
+                       ms4t10     ,    -- run number
+                       ms4t11     ,    -- visit date
+                       ms4t12     ,    -- auto
+                       ms4t230    ,    -- created user
+                       ms4t231         -- created date
+                     )
+            values   (
+                       i_ms4t1    ,    -- ser in head(f.k ms2t1)
+                       i_ms4t2    ,    -- serial in tail1(ms3t2)
+                       i_ms4t3    ,    -- serial 
+                       i_ms4t4    ,    -- visit activity code
+                       i_ms4t5    ,    -- order
+                       i_ms4t6    ,    -- visible [y/n]
+                       i_ms4t7    ,    -- mandatory [y/n]
+                       i_ms4t8    ,    -- active [y/n]
+                       i_ms4t10   ,    -- run number
+                       i_ms4t11   ,    -- visit code
+                       'N'        ,    -- auto
+                       i_ms2t230  ,    -- created user
+                       sysdate         -- created date
+                     );  
+    -------------                 
+    comm;
+    -------------                  
+exception 
+    when dup_val_on_index then  null;
+end;
+-------------                     
+begin
+    -------------
+    for i in (
+                select  ms12mcp    ,    -- company
+                        ms12myr    ,    -- year
+                        ms12m1     ,    -- run number
+                        ms12m2     ,    -- root number
+                        ms12m4     ,    -- visit code
+                        ms12m5     ,    -- from date
+                        ms12m6     ,    -- to date
+                        ms12m7     ,    -- branch
+                        ms12m8     ,    -- rep type 1-2-3
+                        ms12m9          -- rep code
+                from    ms12m 
+                where   ms12m1=i_ms12m1
+             ) loop
+                -------------    
+                delete from ms4t where ms4t10 = i.ms12m1 or  (ms4t11 between i.ms12m5 and i.ms12m6) ;
+                delete from ms3t where ms3t6 =  i.ms12m1 or  (ms3t7  between i.ms12m5 and i.ms12m6) ;     
+                delete from ms2t where ms2t1 =  i.ms12m1 or  (ms2t3  between i.ms12m5 and i.ms12m6) ;
+                -------------                
+                w_day_no    := (i.ms12m6 - i.ms12m5 ) + 1;             -- no of day between from to date                 
+                w_first_day := i.ms12m5;                               -- first date
+                -------------
+                for  j in 1 .. w_day_no loop
+                    -------------
+                    w_weak_no  := to_char(w_first_day,'w');            -- return week number
+                    w_day_name := to_char(w_first_day,'day');          -- return  day name 
+                    -------------    
+                    -- delete from ms4t,ms3t                        
+                   
+                    -------------  
+                    -- insert into head
+                    insert_ms2t (
+                                 i_ms12m1     ,      -- run number
+                                 w_first_day  ,      -- calendar date
+                                 i.ms12mcp    ,      -- company 
+                                 i.ms12myr    ,      -- year
+                                 i.ms12m7     ,      -- branch
+                                 i.ms12m8     ,      -- rep type 1-2-3
+                                 i.ms12m9     ,      -- rep code
+                                 i.ms12m2     ,      -- root code
+                                 i.ms12m4     ,      -- visit template  code
+                                 w_ser_head1         -- ser
+                                      
+                                );                                
+                    -------------
+                    -- ref cursor for select from ms13m where culums name='Y'
+                    -- get_colum_ms13m for getting culnms name
+                    w_stmt := 'select ms13m2 , ms13mcp , ms13myr , ms13m3 , ms13m4 , ms13m5 from ms13m ';
+                    w_stmt := w_stmt||' where '||get_colum_ms13m(w_weak_no,w_day_name)||' = ''Y'' ';
+                    w_stmt := w_stmt||' and ms13m1 = '||i_ms12m1||' order by ms13m5 ';  
+                    -------------
+                    open  w_ref_cur for w_stmt;   -- open ref cursor
+                    loop
+                        -------------
+                        fetch  w_ref_cur into w_ms13m2  ,      -- serial in ms13t 
+                                                w_ms13mcp ,      -- company
+                                                w_ms13myr ,      -- year
+                                                w_ms13m3  ,      -- branch
+                                                w_ms13m4  ,      -- client code
+                                                w_ms13m5  ;      -- order
+                        exit when w_ref_cur%notfound;
+                          -------------    
+                        -- get serial for tail1                
+                        select ms3t2_seq.nextval  
+                        into   w_ser1
+                        from   dual;  -- serial of head (f.k ms2t1)
+                          -------------
+                        -- insert into tail 1                
+                        insert_ms3t (
+                                      w_ser_head1      ,     -- ser in head(f.k ms2t1)
+                                      w_ser1           ,     -- ser
+                                        w_ms13mcp        ,     -- company
+                                        w_ms13myr        ,     -- year
+                                        w_ms13m3         ,     -- branch
+                                        w_ms13m4         ,     -- client code
+                                        w_ms13m5         ,     -- order
+                                      i.ms12m1         ,     -- run number
+                                      w_first_day            -- calendar date
+                                    );    
+                        -------------
+                        -- for insert tail2 activites for clients                
+                          for k in ( 
+                                    select ms24m1     ,                 -- run number
+                                             ms24m2     ,                 -- serial in ms13t2
+                                             ms24m3     ,                 -- serial 
+                                             ms24m4     ,                 -- visit activity code
+                                             ms24m5     ,                 -- order
+                                             ms24m6     ,                 -- visible [y/n]
+                                             ms24m7     ,                 -- mandatory [y/n]
+                                             ms24m8                       -- active [y/n]
+                                      from   ms24m
+                                      where  ms24m1 = i_ms12m1            -- run number
+                                      and    ms24m2 = w_ms13m2            -- serial in ms13t2 
+                                 ) loop
+                                    -------------
+                                    -- get serial 
+                                      select ms4t3_seq.nextval
+                                    into   w_ser2
+                                    from   dual;         -- serial in ms3t
+                                    -------------
+                                      insert_ms4t(
+                                                 w_ser_head1   ,       -- ser in head(f.k ms2t1)
+                                                 w_ser1        ,       -- serial in tail1(ms3t2)
+                                                 w_ser2        ,       -- serial 
+                                                 k.ms24m4      ,       -- visit activity code
+                                                 k.ms24m5      ,       -- order
+                                                 k.ms24m6      ,       -- visible [y/n]
+                                                 k.ms24m7      ,       -- mandatory [y/n]
+                                                 k.ms24m8      ,       -- active [y/n]
+                                                 i.ms12m1      ,       -- run number
+                                                 w_first_day           -- calendar date
+                                                );
+                                    -------------               
+                          end loop;
+                        -------------
+                      end loop;
+                      -------------   
+                    w_first_day := w_first_day + 1;
+                    -------------
+                end loop;
+                -------------
+    end loop;
+    -------------
+end insert_ms2t_ms3t;
+--------------------------------------------------
+procedure  pull_in_ms13m(    
+                         i_ms12m1 ms12m.ms12m1%type            ,          -- run no
+                         i_ms12m2 ms12m.ms12m2%type            ,          -- root code
+                         i_ms12m4 ms12m.ms12m4%type            ,          -- visit code
+                         i_user ms12m.ms12m230%type                       -- user
+                         )   is
+    w_max    number;
+    w_max1   number;
+    w_count  number;
+    w_count1 number;
+begin
+-----------------------------
+    select count(ms13m1)            -- tail is empty or not  
+    into   w_count
+    from   ms13m           
+    where  ms13m1=i_ms12m1;        -- run number
+    -----------------------------
+    if w_count = 0 then
+    -----------------------------
+        for i in(select ms7mcp    ,             -- company
+                        ms7myr    ,             -- year
+                        ms7m3     ,             -- branch code    
+                        ms7m4     ,             -- client code
+                        ms7m5                   -- order 
+                 from   ms7m 
+                 where  ms7m1=i_ms12m2 order by ms7m5
+        )    loop
+            ----------------------------- 
+            select nvl(max(nvl(ms13m2,0)),0)+1  -- ser for tail
+            into   w_max
+            from   ms13m                   
+            where  ms13m1=i_ms12m1;             -- run no
+            ------------------------------            
+    begin
+            ------------------------------      
+               insert into ms13m (
+                                     ms13m1                            ,    -- run no   
+                                     ms13m2                            ,    -- ser
+                                     --                                
+                                     ms13mcp                           ,    -- company   code
+                                     ms13myr                           ,    -- year      code
+                                     ms13m3                            ,    -- branch  code  
+                                     ms13m4                            ,    -- client code (f.k cl2m2)  
+                                     ms13m5                            ,    -- order                                   
+                                     ms13m230                           ,   -- user craetd
+                                     ms13m231                               -- date created
+                                 )   values                       
+                                    (i_ms12m1                            ,    -- run no   
+                                     w_max                               ,    -- ser
+                                     --                                  
+                                     i.ms7mcp                            ,    -- company   code
+                                     i.ms7myr                            ,    -- year      code
+                                     i.ms7m3                             ,    -- branch  code  
+                                     i.ms7m4                             ,    -- client code (f.k cl2m2)  
+                                     i.ms7m5                             ,    -- order  
+                                     i_user                              ,    -- user craetd
+                                     sysdate
+                                 );                                           -- date created
+                                  comm;                                       
+             ------------------------------                    
+                                 exception   
+                                 when dup_val_on_index then null;
+                                 end;
+                    ------------------------------              
+                    select count(ms24m1)           -- tail is empty or not  
+                    into   w_count1
+                    from   ms24m           
+                    where  ms24m1=i_ms12m1         -- run code
+                    and    ms24m2=w_max;           -- ser
+                    ------------------------------
+                     if w_count1 = 0 then
+                    ------------------------------    
+                           for j in (select ms4m3              ,       -- activity code
+                                            ms4m4              ,       -- order 
+                                            ms4m5              ,       -- visible
+                                            ms4m6              ,       -- mandatory [y/n]
+                                            ms4m7                       -- active [y/n]
+                                     from   ms4m 
+                                     where  ms4m1=i_ms12m4 order by ms4m4 
+                                     ) loop
+                             ------------------------------
+                            select nvl(max(nvl(ms24m3,0)),0)+1  -- ser for tail
+                            into   w_max1
+                            from   ms24m
+                            where  ms24m1=i_ms12m1
+                            and    ms24m2=w_max;                -- ser 
+                                -------------------------
+                                begin
+                                 insert into ms24m (  
+                                                        ms24m1                   ,   -- run      
+                                                        ms24m2                   ,   -- ser1  
+                                                        ms24m3                   ,   -- ser2  
+                                                        --                         
+                                                        ms24m4                   ,   -- visit activity code (f.k ms9s1)   
+                                                        ms24m5                   ,   -- order  
+                                                        --                          
+                                                        ms24m6                   ,   -- visible [y/n]  
+                                                        ms24m7                   ,   -- mandatory [y/n]  
+                                                        ms24m8                   ,   -- active [y/n]  
+                                                        ms24m230                 ,   -- user craetd  
+                                                        ms24m231                     -- date created  
+                                                    ) values                                   
+                                                    (  
+                                                        i_ms12m1                 ,   -- run      
+                                                        w_max                    ,   -- ser1  
+                                                        w_max1                   ,   -- ser2  
+                                                        --                         
+                                                        j.ms4m3                  ,   -- visit activity code (f.k ms9s1)                     
+                                                        j.ms4m4                  ,   -- order  
+                                                        --   
+                                                        j.ms4m5                  ,   -- visible [y/n]  
+                                                        j.ms4m6                  ,   -- mandatory [y/n]  
+                                                        j.ms4m7                  ,   -- active [y/n]  
+                                                        i_user                   ,   -- user craetd  
+                                                        sysdate
+                                                    );                               -- date created          
+                                                        comm;  
+                                ------------------------------  
+                                    exception       
+                                ------------------------------  
+                                     when dup_val_on_index then null;  
+                                    end;              
+                         end loop;
+                        ------------------------------
+                    end if;
+        ------------------------------                     
+        end loop;
+    ------------------------------
+    end if;
+end pull_in_ms13m;
+--------------------------------------------------
+procedure  pull_in_ms24m(
+                         i_ms12m1 ms12m.ms12m1%type       ,          -- run no
+                         i_ms13m2 ms13m.ms13m2%type       ,          -- serial for tail
+                         i_ms12m4 ms12m.ms12m4%type       ,          -- visit code
+                         i_ms12m230 ms12m.ms12m230%type              -- user
+                         ) is
+    w_count1 number;
+    w_max1   number;
+begin
+------------------------------                 
+    if i_ms12m1 is not null and i_ms13m2 is not null then 
+        ------------------------------
+         select count(ms24m1)  -- tail is empty or not  
+         into   w_count1
+         from   ms24m           
+         where  ms24m1=i_ms12m1     -- run no
+         and    ms24m2=i_ms13m2;    -- ser of tail
+        ------------------------------
+        if w_count1 = 0 then
+        ------------------------------    
+            for j in (   select ms4m3                     ,       -- activity code
+                                ms4m4                     ,       -- order 
+                                   ms4m5                  ,       -- visible
+                                   ms4m6                  ,       -- mandatory [y/n]
+                                   ms4m7                          -- active [y/n]
+                         from   ms4m 
+                         where  ms4m1=i_ms12m4 order by ms4m4 
+                      )  loop
+                        ------------------------------
+                          select nvl(max(nvl(ms24m3,0)),0)+1  -- ser for tail
+                          into   w_max1
+                          from   ms24m
+                          where  ms24m1=i_ms12m1     -- run no
+                          and    ms24m2=i_ms13m2;    -- ser 
+                         ------------------------------ 
+                          begin
+                           insert into ms24m (
+                                                ms24m1                   ,   -- run    
+                                                ms24m2                   ,   -- ser1
+                                                ms24m3                   ,   -- ser2
+                                                --                       
+                                                ms24m4                   ,   -- visit activity code (f.k ms9s1) 
+                                                ms24m5                   ,   -- order
+                                                --                        
+                                                ms24m6                   ,   -- visible [y/n]
+                                                ms24m7                   ,   -- mandatory [y/n]
+                                                ms24m8                   ,   -- active [y/n]
+                                                ms24m230                 ,   -- user craetd
+                                                ms24m231                     -- date created
+                                            ) values                                 
+                                            (
+                                             i_ms12m1                 ,   -- run    
+                                             i_ms13m2                 ,   -- ser1
+                                             w_max1                   ,   -- ser2
+                                             --                       
+                                             j.ms4m3                  ,   -- visit activity code (f.k ms9s1)                      
+                                             j.ms4m4                  ,   -- order
+                                             -- 
+                                             j.ms4m5                  ,   -- visible [y/n]
+                                             j.ms4m6                  ,   -- mandatory [y/n]
+                                             j.ms4m7                  ,   -- active [y/n]
+                                             i_ms12m230               ,   -- user craetd
+                                             sysdate);                    -- date created        
+                                        comm;
+                            ------------------------------
+                            exception     
+                            ------------------------------
+                             when dup_val_on_index then null;
+                            end;            
+            ------------------------------
+            end loop;
+            ------------------------------
+        end if;
+     ------------------------------    
+    end if;
+end pull_in_ms24m;
+--------------------------------------------------
+procedure  pull_in_ms3t(    
+                         i_ms2t1 ms2t.ms2t1%type            ,          -- ser no
+                         i_ms2t3 ms2t.ms2t3%type            ,          -- visit date
+                         i_ms2t7 ms2t.ms2t7%type            ,          -- root code
+                         i_ms2t8 ms2t.ms2t8%type            ,          -- visit code
+                         i_user ms2t.ms2t230%type                       -- user
+                         )   is
+    w_max    number;
+    w_max1   number;
+    w_count  number;
+    w_count1 number;
+begin
+-----------------------------
+    select count(ms3t1)            -- tail is empty or not  
+    into   w_count
+    from   ms3t           
+    where  ms3t1=i_ms2t1;        -- ser number
+    -----------------------------
+    if w_count = 0 then
+    -----------------------------
+        for i in(select ms7mcp    ,             -- company
+                        ms7myr    ,             -- year
+                        ms7m3     ,             -- branch code    
+                        ms7m4     ,             -- client code
+                        ms7m5                   -- order 
+                 from   ms7m 
+                 where  ms7m1=i_ms2t7 order by ms7m5
+        )    loop
+            ----------------------------- 
+            select nvl(max(nvl(ms3t2,0)),0)+1  -- ser for tail
+            into   w_max
+            from   ms3t                   
+            where  ms3t1=i_ms2t1;             -- ser no
+            ------------------------------            
+    begin
+            ------------------------------      
+               insert into ms3t (
+                                     ms3t1                            ,    -- run no   
+                                     ms3t2                            ,    -- ser
+                                     --                                
+                                     ms3tcp                           ,    -- company   code
+                                     ms3tyr                           ,    -- year      code
+                                     ms3t3                            ,    -- branch  code  
+                                     ms3t4                            ,    -- client code (f.k cl2m2)  
+                                     ms3t5                            ,    -- order
+                                     ms3t7                            ,       -- visit date
+                                     ms3t8                            ,       -- manual                                     
+                                     ms3t230                          ,    -- user craetd
+                                     ms3t231                               -- date created
+                                 )   values                       
+                                    (i_ms2t1                             ,    -- run no   
+                                     w_max                               ,    -- ser
+                                     --                                  
+                                     i.ms7mcp                            ,    -- company   code
+                                     i.ms7myr                            ,    -- year      code
+                                     i.ms7m3                             ,    -- branch  code  
+                                     i.ms7m4                             ,    -- client code (f.k cl2m2)  
+                                     i.ms7m5                             ,    -- order  
+                                     i_ms2t3                             ,    -- visit date
+                                     'Y'                                 ,    -- MANUAL    
+                                     i_user                              ,    -- user craetd
+                                     sysdate
+                                 );                                           -- date created
+                                  comm;                                       
+             ------------------------------                    
+                                 exception   
+                                 when dup_val_on_index then null;
+                                 end;
+                    ------------------------------              
+                    select count(ms4t1)           -- tail is empty or not  
+                    into   w_count1
+                    from   ms4t           
+                    where  ms4t1=i_ms2t1         -- run code
+                    and    ms4t2=w_max;           -- ser
+                    ------------------------------
+                     if w_count1 = 0 then
+                    ------------------------------    
+                           for j in (select ms4m3              ,       -- activity code
+                                            ms4m4              ,       -- order 
+                                            ms4m5              ,       -- visible
+                                            ms4m6              ,       -- mandatory [y/n]
+                                            ms4m7                       -- active [y/n]
+                                     from   ms4m 
+                                     where  ms4m1=i_ms2t8 order by ms4m4 
+                                     ) loop
+                             ------------------------------
+                            select nvl(max(nvl(ms4t3,0)),0)+1  -- ser for tail
+                            into   w_max1
+                            from   ms4t
+                            where  ms4t1=i_ms2t1
+                            and    ms4t2=w_max;                -- ser 
+                                -------------------------
+                                begin
+                                 insert into ms4t (  
+                                                        ms4t1                   ,   -- run      
+                                                        ms4t2                   ,   -- ser1  
+                                                        ms4t3                   ,   -- ser2  
+                                                        --                         
+                                                        ms4t4                   ,   -- visit activity code (f.k ms9s1)   
+                                                        ms4t5                   ,   -- order  
+                                                        --                          
+                                                        ms4t6                   ,   -- visible [y/n]  
+                                                        ms4t7                   ,   -- mandatory [y/n]  
+                                                        ms4t8                   ,   -- active [y/n]
+                                                        ms4t11                    ,   -- visit date
+                                                        ms4t12                  ,   -- manual                                                        
+                                                        ms4t230                 ,   -- user craetd  
+                                                        ms4t231                     -- date created  
+                                                    ) values                                   
+                                                    (  
+                                                        i_ms2t1                 ,   -- run      
+                                                        w_max                    ,   -- ser1  
+                                                        w_max1                   ,   -- ser2  
+                                                        --                         
+                                                        j.ms4m3                  ,   -- visit activity code (f.k ms9s1)                     
+                                                        j.ms4m4                  ,   -- order  
+                                                        --   
+                                                        j.ms4m5                  ,   -- visible [y/n]  
+                                                        j.ms4m6                  ,   -- mandatory [y/n]  
+                                                        j.ms4m7                  ,   -- active [y/n]
+                                                        i_ms2t3                  ,   -- visit date
+                                                        'Y'                      ,   -- MANUAL                                                        
+                                                        i_user                   ,   -- user craetd  
+                                                        sysdate
+                                                    );                               -- date created          
+                                                        comm;  
+                                ------------------------------  
+                                    exception       
+                                ------------------------------  
+                                     when dup_val_on_index then null;  
+                                    end;              
+                         end loop;
+                        ------------------------------
+                    end if;
+        ------------------------------                     
+        end loop;
+    ------------------------------
+    end if;
+end pull_in_ms3t;
+--------------------------------------------------
+procedure do_success (
+                       i_ms7t1  ms7t.ms7t1%type  ,    -- run no.  (f.k ms6s1)
+                       i_ms7t2  ms7t.ms7t2%type       -- ser
+                       )   is
+                       pragma autonomous_transaction;
+begin
+    ------------
+    update ms7t 
+    set    ms7t17  = 'S'                            -- status [S succeded / F fail]           
+    where  ms7t1  =  i_ms7t1 and                    -- run no.  (f.k ms6s1)
+           ms7t2  =  i_ms7t2  ;                     -- ser
+    ------------
+    comm;
+    ------------
+end do_success;
+--------------------------------------------------
+procedure do_fail (
+                    i_ms7t1               ms7t.ms7t1%type ,   -- run no.  (f.k ms6s1)
+                    i_ms7t2               ms7t.ms7t2%type ,   -- ser
+                    i_error_code          ms8t.ms8t4%type ,   -- error code   
+                    i_error_text          ms8t.ms8t5%type     -- error text 
+                   ) is
+                   pragma autonomous_transaction;
+w_ms7t18         ms7t.ms7t18%type;
+begin
+    ------------
+    begin
+        select ms7t18                -- binding (ms8t2_seq)
+        into   w_ms7t18              -- binding (ms8t2_seq)
+        from   ms7t
+        where  ms7t1 = i_ms7t1 and   -- run no.  (f.k ms6s1)
+               ms7t2 = i_ms7t2  ;    -- ser  
+        ------------       
+        if w_ms7t18 is null then 
+            w_ms7t18 := get_ms8t2_seq;    
+        end if;        
+        ------------
+        update ms7t 
+        set    ms7t17  =  'F'            ,             -- status [S succeded / F fail]
+               ms7t18  =  w_ms7t18                     -- binding (ms8t2_seq)
+        where  ms7t1   =  i_ms7t1 and                  -- run no.  (f.k ms6s1)
+               ms7t2   =  i_ms7t2    ;                 -- ser
+        ------------
+        comm;
+        ------------
+    exception 
+        when no_data_found then 
+            raise_application_error(-20012,'no data found...msa_pkg.do_fail...ms8t');
+    end ;
+    ------------
+    insert_ms8t( 
+                 w_ms7t18     ,           -- binding (ms8t2_seq)
+                 1            ,           -- error identifier ( f.k ms31s1)
+                 i_error_code ,           -- error code
+                 i_error_text             -- error text 
+                 );
+    ------------
+end do_fail;
+--------------------------------------------------
+procedure insert_ms8t (
+                        i_ms8t2               ms8t.ms8t2%type ,   -- binding (ms8t2_seq)
+                        i_ms8t3               ms8t.ms8t3%type ,   -- error identifier ( f.k ms31s1)
+                        i_ms8t4               ms8t.ms8t4%type ,   -- error code
+                        i_ms8t5               ms8t.ms8t5%type     -- error text 
+                       ) is                                                      
+                   pragma autonomous_transaction;
+w_ms8t1_seq      number;                   
+begin
+    ------------
+    w_ms8t1_seq := get_ms8t1_seq;
+    ------------
+    insert into ms8t (
+                       ms8t1          ,          -- seq
+                       --            
+                       ms8t2          ,          -- binding (ms8t2_seq)
+                       ms8t3          ,          -- error identifier ( f.k ms31s1)
+                       ms8t4          ,          -- error code
+                       ms8t5          ,          -- error text 
+                       ms8t6                     -- transaction date                      
+                      )
+               values ( 
+                        w_ms8t1_seq    ,         -- seq
+                        --                       
+                        i_ms8t2        ,         -- binding (ms8t2_seq)
+                        i_ms8t3        ,         -- error identifier ( f.k ms31s1)
+                        i_ms8t4        ,         -- error code
+                        i_ms8t5        ,         -- error text 
+                        sysdate                  -- transaction date                   
+                      );                                      
+    ------------
+    comm;
+    ------------
+exception
+    when dup_val_on_index then 
+        raise_application_error(-20013,'duplicate row...msa_pkg.do_fail...ms8t');
+end insert_ms8t;
+--------------------------------------------------
+procedure get_tablename_pref_suf (
+                                  o_ms30s3   out  ms30s.ms30s3%type ,          -- transfere table   start with
+                                  o_ms30s4   out  ms30s.ms30s4%type            -- transfere table   end with
+                                 ) 
+is
+--
+begin
+ select  ms30s3    ,          -- transfere table   start with
+         ms30s4               -- transfere table   end with
+ into    o_ms30s3  ,          -- transfere table   start with
+         o_ms30s4             -- transfere table   end with
+ from    ms30s
+ where   ms30s1  = 1 ;         -- serial
+exception
+  when no_data_found then
+     raise_application_error(-20014,'no data found while select from ms30s');
+end;
+--------------------------------------------------
+procedure task_create_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2    (4000);          -- table name
+ w_oracle_syntax   varchar2 (4000)   ;  
+ w_sqllite_syntax  varchar2 (4000)   ;  
+ w_col             varchar2 (1000)   ;  
+ w_data_type       varchar2 (1000)   ;  
+ w_pk              varchar2(1000)    ; 
+ w_ms9t1           ms9t.ms9t1%type   ;
+---
+cursor cur_ms27s
+is
+select  ms27s3                   ,               -- column name           (fk wf4m.wf4m12)
+        ms27s5                   ,               -- order
+        ms27s6                   ,               -- pk column
+        ms27s7                   ,               -- data type
+        ms27s8                   ,               -- length
+        ms27s9                                   -- scale width if wf4m6=N
+        --
+from    ms27s
+where   ms27s1 = 'T'                  -- database object type  (fk wf3m.wf3m1001)  
+and     ms27s2 = i_table              -- object name           (fk wf3m.wf3m1)
+and    nvl(ms27s4,'N') = 'Y'          -- Active (Y/N Default N) 
+order by ms27s5    ,                  -- order
+         ms27s6     ;                 -- pk column
+---
+begin
+---
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+if length(w_table_name) > 30 then
+  raise_application_error(-20015,' legth of table name '|| w_table_name ||' more than 30 character');
+end if;
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+---
+ w_ms9t1 := get_ms9t1_seq ;
+---
+ insert_into_ms9t (
+                    w_ms9t1          ,          -- seq (ms9t1_seq)
+                    o_oracle_bind    ,          -- binding column (ms9t2_seq)
+                    2                ,          -- identifier (fk ms31s1)
+                    sysdate          ,          -- transaction date
+                    i_run_number     ,          -- run no.  (f.k ms6s1)
+                    i_table                     -- table name
+                   );
+---
+ w_oracle_syntax  := ' create table '||w_table_name||'( ' ||chr(10); 
+ w_sqllite_syntax := ' create table if not exists '||w_table_name||'( ' ||chr(10);
+---
+for c_ms27s in cur_ms27s loop
+ --
+ if c_ms27s.ms27s7 = 'C' then 
+    w_data_type   := 'varchar2';
+ elsif c_ms27s.ms27s7 = 'D' then  
+    w_data_type   := 'date';
+ elsif c_ms27s.ms27s7 = 'N' then  
+    w_data_type   := 'number';
+ end if;
+ --
+ if  c_ms27s.ms27s9 is not null then             -- scale width if wf4m6=N          
+    w_col := c_ms27s.ms27s3||' '|| w_data_type || ' ('||c_ms27s.ms27s8||','||c_ms27s.ms27s9||'),'||chr(10);
+ elsif c_ms27s.ms27s8 is not null  then          -- length
+    w_col := c_ms27s.ms27s3||' '|| w_data_type || ' ('||c_ms27s.ms27s8||'),'||chr(10);
+ else
+    w_col := c_ms27s.ms27s3||' '|| w_data_type ||','||chr(10);
+ end if;
+ --
+ if nvl(c_ms27s.ms27s6,'N') = 'Y'  then         -- pk column 
+   ----
+   if w_pk is null then
+     w_pk := '('||c_ms27s.ms27s3;
+   else
+     w_pk :=  w_pk||','||c_ms27s.ms27s3;
+   end if;
+   -----
+ end if;
+ --
+ if nvl(length(w_col),0) + nvl(length(w_oracle_syntax),0) < 3700  then
+    w_oracle_syntax := w_oracle_syntax || w_col ;
+    w_col           := '' ;
+ else
+    insert_into_ms12t (
+                        w_ms9t1         ,          -- fk( ms9t1)
+                        o_oracle_bind   ,          -- binding column (ms9t2_seq)
+                        2               ,          -- identifier (fk ms31s1)
+                        w_oracle_syntax ,          -- statement text 
+                        i_run_number               -- run no.  (f.k ms6s1)
+                      );
+    w_oracle_syntax := w_col ;
+ end if;
+ --
+end loop;
+---
+if w_pk is not null then
+   w_pk := ' constraint '||w_table_name||'_key  primary key '||w_pk||'));' ;
+end if;
+---
+w_oracle_syntax := w_oracle_syntax || w_pk ;
+---
+insert_into_ms12t (
+                    w_ms9t1         ,          -- fk( ms9t1)
+                    o_oracle_bind   ,          -- binding column (ms9t2_seq)
+                    2               ,          -- identifier (fk ms31s1)
+                    w_oracle_syntax ,          -- statement text 
+                    i_run_number               -- run no.  (f.k ms6s1)
+                  );
+--
+commit;
+--
+end;
+--------------------------------------------------
+function get_ms9t1_seq  return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms9t1_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms9t1_seq;
+--------------------------------------------------
+function get_ms9t2_seq  return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms9t2_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms9t2_seq;
+--------------------------------------------------
+procedure insert_into_ms9t (
+                            i_ms9t1              ms9t.ms9t1%type ,          -- seq (ms9t1_seq)
+                            i_ms9t2              ms9t.ms9t2%type ,          -- binding column (ms9t2_seq)
+                            i_ms9t3              ms9t.ms9t3%type ,          -- identifier (fk ms31s1)
+                            i_ms9t4              ms9t.ms9t4%type ,          -- transaction date
+                            i_ms9t5              ms9t.ms9t5%type ,          -- run no.  (f.k ms6s1)
+                            i_ms9t6              ms9t.ms9t6%type            -- table name
+                           )
+is
+--
+begin
+--
+insert into ms9t (
+                   ms9t1              ,          -- seq (ms9t1_seq)
+                   --
+                   ms9t2              ,          -- binding column (ms9t2_seq)
+                   ms9t3              ,          -- identifier (fk ms31s1)
+                   ms9t4              ,          -- transaction date
+                   ms9t5              ,          -- run no.  (f.k ms6s1)
+                   ms9t6                         -- table name
+                  )
+            values(
+                   i_ms9t1              ,          -- seq (ms9t1_seq)
+                   --
+                   i_ms9t2              ,          -- binding column (ms9t2_seq)
+                   i_ms9t3              ,          -- identifier (fk ms31s1)
+                   i_ms9t4              ,          -- transaction date
+                   i_ms9t5              ,          -- run no.  (f.k ms6s1)
+                   i_ms9t6                         -- table name
+                  ); 
+--
+exception
+--
+  when dup_val_on_index then
+    raise_application_error(-20015,' dup_val_on_index while insert into ms9t');
+end;
+--------------------------------------------------
+function get_table_name(
+                        i_sid                   ms35m.ms35m1%type  ,  -- SID
+                        i_table                 ms26s.ms26s2%type     -- object  name           (fk wf3m.wf3m1)
+                       )
+return varchar2
+is
+--
+ w_ms30s3          ms30s.ms30s3%type ;          -- transfere table   start with
+ w_ms30s4          ms30s.ms30s4%type ;          -- transfere table   end with
+ w_table_name      varchar2(1000)    ;
+--
+begin
+----
+ get_tablename_pref_suf (
+                          w_ms30s3     ,          -- transfere table   start with
+                          w_ms30s4                -- transfere table   end with
+                        );
+---
+ w_table_name := w_ms30s3||i_table||w_ms30s4||'_'||i_sid ;
+----
+return w_table_name ;
+--
+end;
+--------------------------------------------------
+procedure insert_into_ms12t (
+                              i_ms12t1    ms12t.ms12t1%type    ,          -- fk( ms9t1)
+                              --
+                              i_ms12t3    ms12t.ms12t3%type    ,          -- binding column (ms9t2_seq)
+                              i_ms12t4    ms12t.ms12t4%type    ,          -- identifier (fk ms31s1)
+                              i_ms12t5    ms12t.ms12t5%type    ,          -- statement text 
+                              i_ms12t6    ms12t.ms12t6%type               -- run no.  (f.k ms6s1)
+                            )
+is
+--
+ w_ms12t2    ms12t.ms12t2%type ;
+--
+begin
+--
+ w_ms12t2    := get_ms12t2_seq;
+--
+insert into ms12t (
+                    ms12t1              ,          -- fk( ms9t1)
+                    ms12t2              ,          -- serial from sequence ( ms12t2_seq )
+                    --
+                    ms12t3              ,          -- binding column (ms9t2_seq)
+                    ms12t4              ,          -- identifier (fk ms31s1)
+                    ms12t5              ,          -- statement text 
+                    ms12t6                         -- run no.  (f.k ms6s1)
+                  )
+          values ( 
+                    i_ms12t1              ,          -- fk( ms9t1)
+                    w_ms12t2              ,          -- serial from sequence ( ms12t2_seq )
+                    --
+                    i_ms12t3              ,          -- binding column (ms9t2_seq)
+                    i_ms12t4              ,          -- identifier (fk ms31s1)
+                    i_ms12t5              ,          -- statement text 
+                    i_ms12t6                         -- run no.  (f.k ms6s1)
+                 );
+--
+exception
+--
+  when dup_val_on_index then
+    raise_application_error(-20020,' dup_val_on_index while insert into ms12t');
+end;
+--------------------------------------------------
+function get_ms12t2_seq  return number 
+is 
+seq_valu  number ;
+begin 
+    -------------
+    select ms12t2_seq.nextval
+    into   seq_valu
+    from   dual ;
+    -------------
+    return seq_valu ;
+    -------------
+end get_ms12t2_seq;
+--------------------------------------------------
+procedure task_drop_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2 (4000)   ;          -- table name
+ w_oracle_syntax   varchar2 (4000)   ;  
+ w_sqllite_syntax  varchar2 (4000)   ;  
+ w_ms9t1           ms9t.ms9t1%type   ;
+---
+begin
+---
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+---
+ w_ms9t1 := get_ms9t1_seq ;
+---
+ insert_into_ms9t (
+                    w_ms9t1          ,          -- seq (ms9t1_seq)
+                    o_oracle_bind    ,          -- binding column (ms9t2_seq)
+                    3                ,          -- identifier (fk ms31s1)
+                    sysdate          ,          -- transaction date
+                    i_run_number     ,          -- run no.  (f.k ms6s1)
+                    i_table                     -- table name
+                   );
+---
+ w_oracle_syntax  := ' drop table '||w_table_name||' ; ' ||chr(10); 
+ w_sqllite_syntax := ' drop table '||w_table_name||' ; ' ||chr(10); 
+---
+insert_into_ms12t (
+                    w_ms9t1         ,          -- fk( ms9t1)
+                    o_oracle_bind   ,          -- binding column (ms9t2_seq)
+                    3               ,          -- identifier (fk ms31s1)
+                    w_oracle_syntax ,          -- statement text 
+                    i_run_number               -- run no.  (f.k ms6s1)
+                  );
+--
+commit;
+---
+---
+end;
+--------------------------------------------------
+procedure task_delete_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2 (4000)   ;          -- table name
+ w_oracle_syntax   varchar2 (4000)   ;  
+ w_sqllite_syntax  varchar2 (4000)   ;  
+ w_ms9t1           ms9t.ms9t1%type   ;
+---
+begin
+---
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+---
+ w_ms9t1 := get_ms9t1_seq ;
+---
+ insert_into_ms9t (
+                    w_ms9t1          ,          -- seq (ms9t1_seq)
+                    o_oracle_bind    ,          -- binding column (ms9t2_seq)
+                    4                ,          -- identifier (fk ms31s1)
+                    sysdate          ,          -- transaction date
+                    i_run_number     ,          -- run no.  (f.k ms6s1)
+                    i_table                     -- table name
+                   );
+---
+ w_oracle_syntax  := ' delete table '||w_table_name||' ; ' ||chr(10); 
+ w_sqllite_syntax := ' delete table '||w_table_name||' ; ' ||chr(10); 
+---
+insert_into_ms12t (
+                    w_ms9t1         ,          -- fk( ms9t1)
+                    o_oracle_bind   ,          -- binding column (ms9t2_seq)
+                    4               ,          -- identifier (fk ms31s1)
+                    w_oracle_syntax ,          -- statement text 
+                    i_run_number               -- run no.  (f.k ms6s1)
+                  );
+--
+commit;
+---
+---
+end;
+--------------------------------------------------
+procedure task_alter_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2 (4000)   ;          -- table name
+ w_statement       varchar2 (4000)   ;    
+ w_ms9t1           ms9t.ms9t1%type   ;
+ w_count           number            ;
+ wtable_name       user_tab_columns.table_name%type ; 
+ wcolumn_name      user_tab_columns.column_name%type;
+ wdata_type        user_tab_columns.data_type%type  ;
+ wdata_length      user_tab_columns.data_length%type;
+ wdata_precision   user_tab_columns.data_precision%type;
+ wdata_scale       user_tab_columns.data_scale%type ;
+---
+cursor cur_original
+is
+select table_name ,column_name ,data_type ,data_length ,data_precision ,data_scale
+from user_tab_cols
+where table_name = i_table ;
+---
+begin
+---
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+--------------------------------------------------
+ select nvl(count (table_name),0)
+ into   w_count 
+ from   user_tab_columns
+ where  table_name  = w_table_name ;
+ --
+ if w_count <> 0 then
+    for c_original in cur_original loop
+      begin
+         select table_name  , column_name  , data_type  , data_length  , data_precision  , data_scale
+         into   wtable_name , wcolumn_name , wdata_type , wdata_length , wdata_precision , wdata_scale
+         from   user_tab_columns
+         where  table_name  = w_table_name
+         and    column_name = c_original.column_name;
+         --
+         if c_original.data_type = 'VARCHAR2' then 
+              --
+              if wdata_length <> c_original.data_length 
+              or wdata_type   <> c_original.data_type   then
+                 w_statement := 'alter table '||w_table_name||' modify '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_length||')';
+              end if;
+              --
+         elsif c_original.data_type = 'DATE' then
+              if wdata_type <> c_original.data_type then
+                w_statement := 'alter table '||w_table_name||' modify '||c_original.column_name||' '||c_original.data_type||'';
+              end if;
+         else   -- if c_original.data_type = 'NUMBER'
+              if wdata_type      <> c_original.data_type 
+              or wdata_precision <> c_original.data_precision  
+              or wdata_scale     <> c_original.data_scale     then
+                   if  c_original.data_precision is not null 
+                   and c_original.data_scale <> 0             then
+                       w_statement := 'alter table '||w_table_name||' modify '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_precision||','||c_original.data_scale||')';
+                   elsif c_original.data_precision is not null 
+                   and c_original.data_scale = 0               then
+                       w_statement := 'alter table '||w_table_name||' modify '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_precision||')';
+                   else -- c_original.data_precision is null and c_original.data_scale is null 
+                       w_statement := 'alter table '||w_table_name||' modify '||c_original.column_name||' '||c_original.data_type||'';
+                   end if;
+              end if;    
+         end if;
+         -------  
+      exception
+        when no_data_found then  --write add column to script file
+           if c_original.data_type = 'VARCHAR2' then 
+               w_statement := 'alter table '||w_table_name||' add '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_length||')';
+           elsif c_original.data_type = 'DATE' then
+                w_statement := 'alter table '||w_table_name||' add '||c_original.column_name||' '||c_original.data_type;
+           else   -- if c_original.data_type = 'number'
+                if c_original.data_precision is not null and c_original.data_scale <> 0 then
+                   w_statement := 'alter table '||w_table_name||' add '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_precision||','||c_original.data_scale||')';
+                elsif c_original.data_precision is not null and c_original.data_scale = 0 then
+                   w_statement := 'alter table '||w_table_name||' add '||c_original.column_name||' '||c_original.data_type||'('||c_original.data_precision||')';
+                else -- c_original.data_precision is null and c_original.data_scale is null 
+                   w_statement := 'alter table '||w_table_name||' add '||c_original.column_name||' '||c_original.data_type;
+                end if;    
+           end if;
+      end;
+      --
+      if w_statement is not null then
+        w_ms9t1 := get_ms9t1_seq ;
+        ---
+        insert_into_ms9t (
+                          w_ms9t1          ,          -- seq (ms9t1_seq)
+                          o_oracle_bind    ,          -- binding column (ms9t2_seq)
+                          5                ,          -- identifier (fk ms31s1)
+                          sysdate          ,          -- transaction date
+                          i_run_number     ,          -- run no.  (f.k ms6s1)
+                          i_table                     -- table name
+                          );
+        ---
+        w_statement := w_statement ||';';
+        insert_into_ms12t (
+                           w_ms9t1         ,          -- fk( ms9t1)
+                           o_oracle_bind   ,          -- binding column (ms9t2_seq)
+                           5               ,          -- identifier (fk ms31s1)
+                           w_statement     ,          -- statement text 
+                           i_run_number               -- run no.  (f.k ms6s1)
+                          );
+      end if;
+      --
+      w_statement := null ;
+      --
+   end loop ;
+ end if;
+--------------------------------------------------
+end;
+--------------------------------------------------
+procedure task_insert_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2 (4000)   ;          -- table name
+ w_oracle_syntax   varchar2 (4000)   ;  
+ w_sqllite_syntax  varchar2 (4000)   ;  
+ w_ms9t1           ms9t.ms9t1%type   ;
+ w_column          varchar2 (30000)  ;
+ w_statement       clob  ;
+ w_output          clob  ;
+---
+ type itemsCurType  is ref cursor;
+ items_cur          itemsCurType ;
+---
+begin
+--
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+--
+ w_statement        := gen_insert_statement (i_table,w_table_name);
+--
+--insert into c values (w_statement);
+commit;
+ open   items_cur FOR   w_statement ;
+ loop
+   ----
+   fetch items_cur into  w_output ;
+   EXIT WHEN items_cur%NOTFOUND;
+   --insert into c values (w_output);
+   commit;
+   ----
+ end loop ;
+
+ close items_cur;
+
+end;
+--------------------------------------------------
+function gen_insert_statement (
+                               i_table       varchar2   ,    -- get data from table name  
+                               i_new_table   varchar2        -- insert data into table 
+                              )  
+return clob  
+is  
+ w_coulmns     varchar2 (32000);  
+ w_values      varchar2 (32000);  
+ w_col_val     varchar2 (200);  
+ --
+ cursor cur_ms27s
+ is
+ select  ms27s3                   ,               -- column name           (fk wf4m.wf4m12)
+         ms27s7                                   -- data type 
+         --
+ from    ms27s
+ where   ms27s1 = 'T'                  -- database object type  (fk wf3m.wf3m1001)  
+ and     ms27s2 = i_table              -- object name           (fk wf3m.wf3m1)
+ and    nvl(ms27s4,'N') = 'Y'          -- Active (Y/N Default N) 
+ order by ms27s5    ,                  -- order
+          ms27s6     ;                 -- pk column
+--
+begin  
+ for c_ms27s in cur_ms27s loop  
+     --
+     if w_coulmns is not null then
+        w_coulmns := w_coulmns ||','||c_ms27s.ms27s3 ;
+     else 
+        w_coulmns := c_ms27s.ms27s3 ;
+     end if;
+     -- 
+     if    c_ms27s.ms27s7 = 'C'  then  
+         w_col_val :=  '''''''''||' || c_ms27s.ms27s3 || '||''''''''';  
+     elsif c_ms27s.ms27s7 = 'D' then  
+         w_col_val := '''to_date(''''''||to_char(' || c_ms27s.ms27s3  || ',''mm/dd/yyyy hh24:mi'')||'''''',''''mm/dd/yyyy hh24:mi'''')''';  
+     else  
+         w_col_val := c_ms27s.ms27s3;  
+     end if;
+     --  
+     if w_values is not null then
+        w_values := w_values || ',''||decode(' || c_ms27s.ms27s3 || ',null,''null'',' || w_col_val || ')||''';  
+     else
+        w_values := w_values || '''||decode(' || c_ms27s.ms27s3 || ',null,''null'',' || w_col_val || ')||''';  
+     end if; 
+     --
+  end loop;  
+  --
+  return  'select ''insert into '  
+      || i_new_table 
+      || ' ('  
+      || w_coulmns  
+      || ') values ('  
+      || w_values  
+      || ');'' from '  
+      || i_table  ;  
+ end;  
+--------------------------------------------------
+function gen_update_statement (
+                               i_table       varchar2   ,    -- get data from table name  
+                               i_new_table   varchar2        -- insert data into table 
+                              )  
+return clob  
+is  
+ w_coulmns     varchar2 (32000);  
+ w_values      varchar2 (32000); 
+ w_set         varchar2 (32000); 
+ w_col_val     varchar2 (200)  ;  
+ --
+ cursor cur_ms27s
+ is
+ select  ms27s3                   ,               -- column name           (fk wf4m.wf4m12)
+         ms27s7                                   -- data type 
+         --
+ from    ms27s
+ where   ms27s1 = 'T'                  -- database object type  (fk wf3m.wf3m1001)  
+ and     ms27s2 = i_table              -- object name           (fk wf3m.wf3m1)
+ and    nvl(ms27s4,'N') = 'Y'          -- Active (Y/N Default N) 
+ order by ms27s5    ,                  -- order
+          ms27s6     ;                 -- pk column
+--
+begin  
+ for c_ms27s in cur_ms27s loop  
+     -- 
+     if    c_ms27s.ms27s7 = 'C'  then  
+         w_col_val :=  '''''''''||' || c_ms27s.ms27s3 || '||''''''''';  
+     elsif c_ms27s.ms27s7 = 'D' then  
+         w_col_val := '''to_date(''''''||to_char(' || c_ms27s.ms27s3  || ',''mm/dd/yyyy hh24:mi'')||'''''',''''mm/dd/yyyy hh24:mi'''')''';  
+     else  
+         w_col_val := c_ms27s.ms27s3;  
+     end if;
+     --  
+     if w_set is not null then
+        w_set    := w_set ||','||c_ms27s.ms27s3 ||' = '  ||'''||decode(' || c_ms27s.ms27s3 || ',null,''null'',' || w_col_val || ')||''';
+     else
+        w_set    := c_ms27s.ms27s3 ||' = '  ||'''||decode(' || c_ms27s.ms27s3 || ',null,''null'',' || w_col_val || ')||'''; 
+     end if; 
+     --
+  end loop;  
+  --
+  return  'select ''update '  
+      || i_new_table 
+      ||' set ' ||w_set  
+      || ';'' from '  
+      || i_table  ; 
+ end; 
+--------------------------------------------------
+procedure task_update_table_oracle(
+                            i_sid                   ms35m.ms35m1%type  ,  -- SID
+                            i_table                 ms26s.ms26s2%type  ,  -- object  name           (fk wf3m.wf3m1)
+                            i_run_number            number             ,  -- run no.  (f.k ms6s1)
+                            o_oracle_bind      out  ms9t.ms9t2%type    ,  -- oracle  binding   
+                            o_sqllite_bind     out  ms9t.ms9t2%type       -- sqllite binding  
+                           )
+is 
+---
+ w_table_name      varchar2 (4000)   ;          -- table name
+ w_oracle_syntax   varchar2 (4000)   ;  
+ w_sqllite_syntax  varchar2 (4000)   ;  
+ w_ms9t1           ms9t.ms9t1%type   ;
+ w_column          varchar2 (30000)  ;
+ w_statement       clob  ;
+ w_output          clob  ;
+---
+ type itemsCurType  is ref cursor;
+ items_cur          itemsCurType ;
+---
+begin
+--
+ w_table_name := get_table_name(
+                                i_sid                     ,  -- SID
+                                i_table                      -- object  name           (fk wf3m.wf3m1)
+                               );
+---
+ o_oracle_bind      := get_ms9t2_seq ;        -- oracle  binding   
+ o_sqllite_bind     := get_ms9t2_seq ;        -- sqllite binding 
+--
+ w_statement        := gen_update_statement (i_table,w_table_name);
+--
+--insert into c values (w_statement);
+commit;
+ open   items_cur FOR   w_statement ;
+ loop
+   ----
+   fetch items_cur into  w_output ;
+   EXIT WHEN items_cur%NOTFOUND;
+   --insert into c values (w_output);
+   commit;
+   ----
+ end loop ;
+
+ close items_cur;
+
+end;
+--------------------------------------------------
+procedure ins_ms27s (
+                                       i_wf4m1       wf4m.wf4m1%type         ,      -- object name
+									   i_ms27s230    ms27s.ms27s230%type            -- created  by
+                                      ) is 
+									  pragma autonomous_transaction; 
+begin 
+    -------
+	for cur_wf4m in (
+	                  select  wf4m1001     ,                  -- database object type                                                       
+                              wf4m1        ,                  -- object name
+                              wf4m2        ,                  -- column                                            
+                              wf4m4        ,                  -- show colunn (Y Yes ,N No default  Y )
+                              wf4m5        ,                  -- primary key colunn (Y Yes ,N No default  Y )
+                              wf4m6        ,                  -- data type (N Number , D Date ,T Varchar2)
+                              wf4m7        ,                  -- data type width if wf4m6 in (N,T)
+                              wf4m8        ,                  -- scale width if wf4m6=N
+                              wf4m14						  --column id	  
+					  from    wf4m
+                      where   wf4m1001	= 'T'         and     -- database object type 	
+                              wf4m1	    = i_wf4m1             -- object name	
+	                ) loop
+					-------
+					    -------
+						begin
+						    -------
+							insert into ms26s (                    
+					                            ms26s1             ,               -- database object type  (fk wf3m.wf3m1001)  
+                                                ms26s2             ,               -- object name           (fk wf3m.wf3m1) 
+                                                ms26s3             ,               -- Active (Y/N Default N) 
+												ms26s230           ,               -- created  by
+                                                ms26s231                           -- created  on
+					    				      ) 
+					    	       values    (
+                                                cur_wf4m.wf4m1001  ,               -- database object type  (fk wf3m.wf3m1001)  
+                                                cur_wf4m.wf4m1     ,               -- object name           (fk wf3m.wf3m1) 
+                                                'Y'                ,               -- Active (Y/N Default N) 
+                                                i_ms27s230         ,               -- created  by
+                                                sysdate                            -- created  on
+					    	                 );
+							-------
+                        exception	
+                            when dup_val_on_index then null;						
+						end;
+						-------
+						begin
+					    insert into ms27s ( 
+					                       ms27s1               ,     -- database object type  (fk wf3m.wf3m1001)  
+                                           ms27s2               ,     -- object name           (fk wf3m.wf3m1)
+                                           ms27s3               ,     -- column name           (fk wf4m.wf4m12)
+                                           ms27s4               ,     -- Active (Y/N Default N) 
+                                           ms27s6               ,     -- pk column
+                                           ms27s7               ,     -- data type (N Number , D Date ,T Varchar2)
+                                           ms27s8               ,     -- data type width if ms27s7 in (N,T)
+                                           ms27s9               ,     -- scale width if ms27s7=N
+                                           ms27s10			    ,	  --column id				   
+                                           ms27s230             ,     -- created  by
+                                           ms27s231                   -- created  on
+					    				  ) 
+					    		values    (
+					    		           cur_wf4m.wf4m1001    ,     -- database object type  (fk wf3m.wf3m1001)  
+                                           cur_wf4m.wf4m1       ,     -- object name           (fk wf3m.wf3m1)
+                                           cur_wf4m.wf4m2       ,     -- column name           (fk wf4m.wf4m12)
+                                           cur_wf4m.wf4m4       ,     -- Active (Y/N Default N) 
+                                           cur_wf4m.wf4m5       ,     -- pk column
+                                           cur_wf4m.wf4m6       ,     -- data type (N Number , D Date ,T Varchar2)
+                                           cur_wf4m.wf4m7       ,     -- data type width if ms27s7 in (N,T)
+                                           cur_wf4m.wf4m8       ,     -- scale width if ms27s7=N
+                                           cur_wf4m.wf4m14      ,     --column id
+										   i_ms27s230           ,     -- created  by
+                                           sysdate                    -- created  on
+					    		          );
+						-------				  
+					exception
+                        when dup_val_on_index then null;					
+					end;				  
+					-------
+	end loop;
+	-------
+	comm;
+	-------
+end ins_ms27s;
+--------------------------------------------------
+function get_userid_from_sid (
+                               i_ms35m1       ms35m.ms35m1%type          -- SID
+                              ) return ms35m.ms35m4%type
+is
+w_ms35m4 ms35m.ms35m4%type;             -- user code (grus.usno)
+begin                                  
+    --------------                     
+	begin                              
+	    --------------                 
+        select ms35m4                  -- user code (grus.usno)
+        into   w_ms35m4                
+        from   ms35m                   
+        where  ms35m1  = i_ms35m1 ;    -- SID
+		--------------                 
+    exception 
+	    --------------
+        when no_data_found then 
+            raise_application_error(-20014,'no data found...msa_pkg.get_userid_from_sid...ms35m');		
+	end ;
+    --------------
+	if w_ms35m4 is not null then
+	    return w_ms35m4;    -- user code (grus.usno)
+	else 
+	    raise_application_error(-20015,'no data found...msa_pkg.get_userid_from_sid...ms35m');		
+    end if;	
+	--------------
+end get_userid_from_sid;
+--------------------------------------------------
+procedure ins_ms37m_ms38m (
+                            i_ms35m1 ms35m.ms35m1%type        -- SID
+						   )
+is pragma autonomous_transaction;
+begin 
+    ------------------
+    for ms36m_cur in(
+	                  select   ms36m2                     -- profile code (f.k ms33m1)
+					  from     ms36m 
+					  where    ms36m1 = i_ms35m1          -- SID
+					  order by ms36m3,ms36m1,ms36m2       -- order
+                     )
+	------------------			 
+    loop
+	    ------------------
+	    for ms34m_cur in (
+		                   select   ms34m3 ,                      -- table group code (f.k ms29m1)
+						            ms34m4                        -- task group code (f.k ms31m1)
+						   from     ms34m 
+						   where    ms34m1 = ms36m_cur.ms36m2     -- profile code (f.k ms33m1)
+						   order by ms34m5 , ms34m1,ms34m2        -- order
+		                  ) 
+		------------------			  
+		loop 
+		    ------------------
+		    for ms30m_curr in (
+			                    select   ms30m3 ,                    -- database object type  (fk ms26s.ms26s1)  
+								         ms30m4 ,                    -- object name           (fk ms26s.ms26s2) 
+										 ms30m6                      -- order
+								from     ms30m
+								where    ms30m1 = ms34m_cur.ms34m3   -- Group Code  (from ms29m1) 
+                                and 	 nvl(ms30m5,'N') = 'Y'       -- Active (Y/N Default N)							
+								order by ms30m6 , ms30m1 ,ms30m2     -- order
+			                   )
+		    ------------------
+			loop 
+			    ------------------
+			    msa_pkg.insert_ms37m( 
+                                      i_ms35m1          ,                -- SID     (f.k ms35m1)
+				                      ms30m_curr.ms30m3 ,                -- database object type  (fk ms26s1 )
+									  ms30m_curr.ms30m4 ,                -- object name           (fk ms26s2 )
+									  ms30m_curr.ms30m6                  -- order 
+									 );
+				------------------
+				for ms32m_curr in (
+				                    select   ms32m3 ,                    -- Task Code (fk ms28s1)
+										     ms32m5                      -- order
+									from     ms32m
+									where    ms32m1 = ms34m_cur.ms34m4   -- Group Code (from ms31m1)  
+                                    and      nvl(ms32m4,'N') = 'Y'       -- Active (Y/N Default N)									
+									order by ms32m5 , ms32m1,ms32m2      -- order
+				                   )
+				------------------			   
+				loop 
+				    ------------------
+				    msa_pkg.insert_ms38m(
+                                          i_ms35m1          ,             -- SID     (f.k ms37m1)
+					                      ms30m_curr.ms30m3 ,             -- database object type (fk ms37m2)  
+										  ms30m_curr.ms30m4 ,             -- object name  (fk ms37m3)
+										  ms32m_curr.ms32m3 ,             -- task code  (fk ms28s1)
+										  ms32m_curr.ms32m5               -- order
+										 );
+					------------------
+				end loop ;
+			    ------------------
+			end loop; 
+		    ------------------
+		end loop;
+		------------------
+    end loop;
+	------------------
+    comm;
+	------------------
+end ins_ms37m_ms38m ;
+--------------------------------------------------
+procedure insert_ms37m ( 
+                         i_ms37m1    ms37m.ms37m1%type ,    -- SID     (f.k ms35m1)
+                         i_ms37m2    ms37m.ms37m2%type ,    -- database object type  (fk ms26s1 )
+                         i_ms37m3    ms37m.ms37m3%type ,    -- object name           (fk ms26s2 )
+                         i_ms37m4    ms37m.ms37m4%type      -- order 
+                        )
+is pragma autonomous_transaction;                                
+begin 
+    -------------
+    insert into ms37m (
+                        ms37m1          ,  -- SID     (f.k ms35m1)
+                        ms37m2          ,  -- database object type  (fk ms26s1 )
+                        ms37m3          ,  -- object name           (fk ms26s2 )
+                        --
+                        ms37m4            -- order
+                       )
+            values   (
+                       i_ms37m1        ,    -- SID     (f.k ms35m1)
+                       i_ms37m2        ,    -- database object type  (fk ms26s1 )
+                       i_ms37m3        ,    -- object name           (fk ms26s2 )
+                       i_ms37m4            -- order 
+                      );  
+    -------------                 
+    comm;
+    -------------                  
+exception 
+    when dup_val_on_index then  null;
+end insert_ms37m ;             
+--------------------------------------------------
+procedure insert_ms38m (  
+                        i_ms38m1    ms38m.ms38m1%type ,    -- SID     (f.k ms37m1)
+                        i_ms38m2    ms38m.ms38m2%type ,    -- database object type (fk ms37m2)  
+                        i_ms38m3    ms38m.ms38m3%type ,    -- object name  (fk ms37m3)
+                        i_ms38m4    ms38m.ms38m4%type ,    -- task code  (fk ms28s1)
+						i_ms38m5    ms38m.ms38m5%type      -- order
+                       )
+is pragma autonomous_transaction;                                
+begin                                                                         
+    -------------
+    insert into ms38m (
+                       ms38m1          ,  -- SID     (f.k ms37m1)
+                       ms38m2          ,  -- database object type (fk ms37m2) 
+                       ms38m3          ,  -- object name  (fk ms37m3)
+                       ms38m4          ,  -- task code  (fk ms28s1)
+					   ms38m5             -- order
+                     )
+            values   (
+                       i_ms38m1        ,  -- SID     (f.k ms37m1)
+                       i_ms38m2        ,  -- database object type (fk ms37m2)  
+                       i_ms38m3        ,  -- object name  (fk ms37m3)
+                       i_ms38m4        ,  -- task code  (fk ms28s1)
+					   i_ms38m5           -- order
+                     );  
+    -------------                 
+    comm;
+    -------------                  
+exception 
+    when dup_val_on_index then  null;
+end insert_ms38m ;  
+--------------------------------------------------
+function check_item_rep (
+                         i_ms35m1    ms35m.ms35m1%type    ,   -- SID
+					     i_sk1m1     sk1m.sk1m1%type          -- item code
+                         ) return varchar
+is
+w_ms35m4      ms35m.ms35m4%type;                              -- user code (grus.usno)
+w_ms2mcp      ms2m.ms2mcp%type;                               -- company   code            
+w_ms2myr      ms2m.ms2myr%type;                               -- year      code
+w_ms2m2       ms2m.ms2m2%type;                                -- branch  code
+w_ms2m3       ms2m.ms2m3%type;                                -- rep.    type (1-2-3)
+w_ms2m4       ms2m.ms2m4%type;                                -- rep     code  ( f.k cl1m3)
+w_return      varchar2(01);
+begin
+    --------------
+    w_ms35m4 := msa_pkg.get_userid_from_sid ( i_ms35m1  ) ;           -- user code (grus.usno)
+    --------------
+	msa_pkg.get_rep_from_userid(
+                                 w_ms35m4   ,                         -- user code (grus.usno)
+				                 w_ms2mcp   ,                         -- company   code
+				                 w_ms2myr   ,                         -- year      code
+				                 w_ms2m2    ,                         -- branch  code
+				                 w_ms2m3    ,                         -- rep.    type (1-2-3)
+				                 w_ms2m4                              -- rep     code  ( f.k cl1m3)
+                                ) ;
+	--------------
+	if  w_ms2mcp is null or 
+	    w_ms2myr is null or 
+	    w_ms2m2  is null or 
+	    w_ms2m3  is null or
+	    w_ms2m4  is null then 
+	        raise_application_error(-20018,'data is null ...msa_pkg.check_item_rep...ms2m'); 
+	end if;   
+	--------------
+	w_return := msa_pkg.check_item (
+                                     w_ms2mcp   ,             -- company   code
+                                     w_ms2myr   ,             -- year      code
+                                     w_ms2m2    ,             -- branch  code
+                                     w_ms2m3    ,             -- rep.    type (1-2-3)
+                                     w_ms2m4    ,             -- rep     code
+                                     i_sk1m1                  -- item code
+                                    );
+	
+	--------------
+	return w_return;
+	--------------
+end check_item_rep ;
+--------------------------------------------------
+procedure get_rep_from_userid (
+                                i_ms2m21     ms2m.ms2m21%type   ,     -- user code (grus.usno)
+						        o_ms2mcp out ms2m.ms2mcp%type   ,     -- company   code
+						        o_ms2myr out ms2m.ms2myr%type   ,     -- year      code
+						        o_ms2m2  out ms2m.ms2m2%type    ,     -- branch  code
+						        o_ms2m3  out ms2m.ms2m3%type    ,     -- rep.    type (1-2-3)
+						        o_ms2m4  out ms2m.ms2m4%type          -- rep     code  ( f.k cl1m3)
+                               ) 
+is
+
+begin                                  
+    --------------
+	begin 
+	    --------------
+		select ms2mcp ,                  -- company   code
+		       ms2myr ,                  -- year      code
+			   ms2m2  ,                  -- branch  code
+			   ms2m3  ,                  -- rep.    type (1-2-3)
+			   ms2m4                     -- rep     code  ( f.k cl1m3)
+		into   o_ms2mcp ,
+		       o_ms2myr ,
+			   o_ms2m2  ,
+			   o_ms2m3  ,
+			   o_ms2m4  
+		from   ms2m
+		where  ms2m21  = i_ms2m21 ;      -- user code (grus.usno)
+		--------------
+	exception 
+        --------------
+		when no_data_found then 
+            raise_application_error(-20016,'no data found...msa_pkg.get_rep_from_userid...ms2m');		
+        --------------	
+		when too_many_rows then 
+		   raise_application_error(-20017,'too many rows...msa_pkg.get_rep_from_userid...ms2m');		 
+        --------------		
+	end ;
+	--------------
+end get_rep_from_userid;
+--------------------------------------------------
+
+end msa_pkg; 
+/ 
